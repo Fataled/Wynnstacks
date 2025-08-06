@@ -49,18 +49,18 @@ public class RaidCounter {
 
     private long lastCompletionTime = 0;
     private static final long COOLDOWN_MS = 5000; // 5 seconds
-
+    private final long now = System.currentTimeMillis();
     public void checkRaidCompletion() {
         String lastTitle = RaidModel.getLastTitle();
 
         if (!lastTitle.equalsIgnoreCase("Raid Completed!")) return;
 
-        long now = System.currentTimeMillis();
+
         if (now - lastCompletionTime < COOLDOWN_MS) return;
 
         RaidKind activeRaid = RaidModel.getInstance().getCurrentRaid();
         if (activeRaid == null) {
-            LOGGER.warn("[Raid] 'Raid Completed!' shown, but currentRaid is null.");
+           // LOGGER.warn("[Raid] 'Raid Completed!' shown, but currentRaid is null.");
             return;
         }
 
@@ -69,7 +69,7 @@ public class RaidCounter {
         raidCompletions.put(raidCode, current + 1);
         lastCompletionTime = now;
 
-        LOGGER.info("[Raid] Completion counted for: {}", activeRaid.getRaidName());
+       // LOGGER.info("[Raid] Completion counted for: {}", activeRaid.getRaidName());
     }
 
     public void checkRaidFailed() {
@@ -78,12 +78,11 @@ public class RaidCounter {
 
         if (!Cleaned.equalsIgnoreCase("Raid Failed!")) return; // Not a new Fail event
 
-        long now = System.currentTimeMillis();
         if (now - lastCompletionTime < COOLDOWN_MS) return;
 
         RaidKind activeRaid = RaidModel.getInstance().getCurrentRaid();
         if (activeRaid == null) {
-            LOGGER.warn("[Raid] 'Raid Failed!' shown, but currentRaid is null.");
+            //LOGGER.warn("[Raid] 'Raid Failed!' shown, but currentRaid is null.");
             return;
         }
 
@@ -92,7 +91,7 @@ public class RaidCounter {
         raidFails.put(raidCode, current + 1);
         lastCompletionTime = now;
 
-        LOGGER.info("[Raid] Failure counted for: {}", activeRaid.getRaidName());
+       // LOGGER.info("[Raid] Failure counted for: {}", activeRaid.getRaidName());
     }
 
     public static void setActiveRaid(String raidName) {
