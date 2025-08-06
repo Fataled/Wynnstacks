@@ -1,0 +1,52 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package net.fataled.shadestepperqol.shadestepper_qol_huds.client;
+
+import com.mojang.authlib.GameProfile;
+import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.network.message.MessageType;
+import net.minecraft.network.message.SignedMessage;
+import net.minecraft.text.Text;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import java.time.Instant;
+
+public class AutoReady {
+    private static final Logger LOGGER = LogManager.getLogger("ShadestepperHUD");
+
+    public static void detectChat() {
+        ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
+            String Raw = message.getString();
+            String Cleaned1 = stripColors(Raw);
+            String Cleaned2 = removeUnrenderableChars(Cleaned1);
+            if (!Cleaned2.isBlank()) {
+                LOGGER.info("[Game] Chat ->{}", Cleaned2);
+            }
+            if (Cleaned2.contains("click here to ready up")) {
+                assert MinecraftClient.getInstance().player != null;
+                MinecraftClient.getInstance().player.sendMessage(Text.literal("WOW please Ready Up"), false);
+            }
+        });
+
+        ClientReceiveMessageEvents.CHAT.register((Text chat, SignedMessage signedmessage, GameProfile sender, MessageType.Parameters params, Instant receptionTimeStamp) -> {
+            String message = chat.toString().toLowerCase();
+            message = stripColors(message);
+            message = removeUnrenderableChars(message);
+            if(!message.isBlank()){
+                LOGGER.info("[Chat] chat -{}", message);
+            }
+        });
+    }
+
+    public static String stripColors(String input) {
+        return input.replaceAll("§[0-9a-fk-or]", "");
+    }
+
+    public static String removeUnrenderableChars(String input) {
+        return input.codePoints().filter((cp) -> cp >= 32 && cp <= 126 || Character.isWhitespace(cp)).collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
+    }
+}

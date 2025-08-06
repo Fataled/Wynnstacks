@@ -1,0 +1,43 @@
+{
+  "schemaVersion": 1,
+  "id": "shadestepper_qol_huds",
+  "version": "${version}",
+  "name": "WynnStacks",
+  "description": "Js here to help skill issued players",
+  "authors": ["Fataled"],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/shadestepper_qol_huds/icon.png",
+  "environment": "*",
+  "entrypoints": {
+    "client": [
+      "net.fataled.shadestepperqol.shadestepper_qol_huds.client.Shadestepper_qol_hudsClient"
+    ],
+    "main": [
+      "net.fataled.shadestepperqol.shadestepper_qol_huds.Shadestepper_qol_huds"
+    ],
+    "modmenu": [
+      "net.fataled.shadestepperqol.shadestepper_qol_huds.client.ShadestepperModMenu"
+    ]
+
+  },
+  "mixins": [
+    "shadestepper_qol_huds.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": "${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  },
+  "custom": {
+    "modmenu": {
+      "parent": {
+        "id": "shadestepper_qol_huds",
+        "name": "WynnStacks",
+        "description": "I'm here to solve some MASSIVE skill issue",
+        "icon": "assets/shadestepper_qol_huds/icon.png"
+      },
+      "update_checker": true
+    }
+  }
+}
