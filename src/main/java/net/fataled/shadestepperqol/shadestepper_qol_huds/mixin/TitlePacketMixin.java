@@ -2,7 +2,6 @@ package net.fataled.shadestepperqol.shadestepper_qol_huds.mixin;
 
 import net.fataled.shadestepperqol.shadestepper_qol_huds.client.RaidModel;
 import net.fataled.shadestepperqol.shadestepper_qol_huds.event.TitleHandler;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.text.Text;
