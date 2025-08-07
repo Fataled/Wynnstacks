@@ -1,28 +1,28 @@
 {
   "schemaVersion": 1,
-  "id": "shadestepper_qol_huds",
+  "id": "wynnstacks",
   "version": "${version}",
   "name": "WynnStacks",
   "description": "Js here to help skill issued players",
   "authors": ["Fataled"],
   "contact": {},
   "license": "MIT",
-  "icon": "assets/shadestepper_qol_huds/icon.png",
+  "icon": "assets/wynnstacks/icon.png",
   "environment": "*",
   "entrypoints": {
     "client": [
-      "net.fataled.shadestepperqol.shadestepper_qol_huds.client.Shadestepper_qol_hudsClient"
+      "net.fataled.wynnstacks.client.WynnstacksClient"
     ],
     "main": [
-      "net.fataled.shadestepperqol.shadestepper_qol_huds.Shadestepper_qol_huds"
+      "net.fataled.wynnstacks.Wynnstacks"
     ],
     "modmenu": [
-      "net.fataled.shadestepperqol.shadestepper_qol_huds.client.ShadestepperModMenu"
+      "net.fataled.wynnstacks.client.WynnstacksModMenu"
     ]
 
   },
   "mixins": [
-    "shadestepper_qol_huds.mixins.json"
+    "wynnstacks.mixins.json"
   ],
   "depends": {
     "fabricloader": "${loader_version}",
@@ -32,10 +32,10 @@
   "custom": {
     "modmenu": {
       "parent": {
-        "id": "shadestepper_qol_huds",
+        "id": "wynnstacks",
         "name": "WynnStacks",
         "description": "I'm here to solve some MASSIVE skill issue",
-        "icon": "assets/shadestepper_qol_huds/icon.png"
+        "icon": "assets/wynnstacks/icon.png"
       },
       "update_checker": true
     }
