@@ -1,4 +1,4 @@
-package net.fataled.wynnstacks.client;
+package net.fataled.wynnstacks.client.HudConfig;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
@@ -27,6 +27,10 @@ public class HudconfigScreenPage2 extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("Back"), b -> {
             MinecraftClient.getInstance().setScreen(parent);
         }).position(centerX - 100, y + 140).size(200, 20).build());
+
+        addDrawableChild(ButtonWidget.builder(Text.literal("⚙"), b -> {
+            MinecraftClient.getInstance().setScreen(new HudconfigScreenPageSymbols(this.parent));
+        }).position(0, 0).size(50, 50).build());
 
         addDrawableChild(new SliderWidget(centerX - 225, y, 200, 20,
                 Text.literal("X: " + HudConfig.INSTANCE.x),

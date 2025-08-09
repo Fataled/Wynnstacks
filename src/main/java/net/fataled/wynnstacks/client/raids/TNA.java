@@ -1,6 +1,8 @@
-package net.fataled.wynnstacks.client;
+package net.fataled.wynnstacks.client.raids;
 
-public class TNA implements RaidKind{
+import net.fataled.wynnstacks.client.interfaces.RaidKind;
+
+public class TNA implements RaidKind {
 
     @Override
     public String getEntryTitleRaw(){

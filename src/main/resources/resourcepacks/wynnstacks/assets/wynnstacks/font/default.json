@@ -5,9 +5,7 @@
       "file": "wynnstacks:font/stat_icons.png",
       "ascent": 8,
       "height": 16,
-      "chars": [
-        "\uE03A\uE03F\uE03D\uE03C\uE043"
-      ]
+      "chars": ["\ue03a\ue03f\ue03d\ue03c\ue043"]
     }
   ]
 }

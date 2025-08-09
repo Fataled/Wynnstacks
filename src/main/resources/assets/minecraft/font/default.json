@@ -2,7 +2,7 @@
   "providers": [
     {
       "type": "bitmap",
-      "file": "minecraft:font/stat_icons.png",
+      "file": "wynnstacks:font/stat_icons.png",
       "ascent": 12,
       "height": 16,
       "chars": ["\ue03a\ue03f\ue03d\ue03c\ue043"]

@@ -1,4 +1,4 @@
-package net.fataled.wynnstacks.client;
+package net.fataled.wynnstacks.client.Utilities;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;

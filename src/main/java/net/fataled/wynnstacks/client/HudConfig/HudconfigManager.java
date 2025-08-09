@@ -1,4 +1,4 @@
-package net.fataled.wynnstacks.client;
+package net.fataled.wynnstacks.client.HudConfig;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -10,10 +10,11 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.lang.reflect.Field;
+import java.util.LinkedHashMap;
 
 public class HudconfigManager {
 
-    private static final Logger LOGGER = LogManager.getLogger("ShadestepperHUD");
+    private static final Logger LOGGER = LogManager.getLogger("HudconfigManager");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final File CONFIG_PATH = new File(
             FabricLoader.getInstance().getConfigDir().toFile(),
@@ -24,6 +25,9 @@ public class HudconfigManager {
         if (CONFIG_PATH.exists()) {
             try (FileReader reader = new FileReader(CONFIG_PATH)) {
                 HudConfig.INSTANCE = GSON.fromJson(reader, HudConfig.class);
+                if (HudConfig.INSTANCE.chosenSymbols == null) {
+                    HudConfig.INSTANCE.chosenSymbols = new LinkedHashMap<>();
+                }
                 LOGGER.info("HUD config loaded successfully.");
             } catch (IOException e) {
                 LOGGER.error("Failed to load HUD config: {}", e.getMessage());
@@ -61,6 +65,21 @@ public class HudconfigManager {
         HudConfig.INSTANCE.rcS = 1.0f;
         HudConfig.INSTANCE.rcX = 0;
         HudConfig.INSTANCE.rcY = 0;
+
+        // Ensure map exists and has keys before replaceAll
+        if (HudConfig.INSTANCE.chosenSymbols == null) {
+            HudConfig.INSTANCE.chosenSymbols = new LinkedHashMap<>();
+        }
+        // Seed your default keys (strings are safest in JSON)
+        String[] defaultCodes = {"0x271C","0x2248","0x2699","0x2620","0xE03A","0xE03F","0xE03D","0xE03C","0xE043","0x2694"};
+        for (String code : defaultCodes) {
+            HudConfig.INSTANCE.chosenSymbols.putIfAbsent(code, true); // or false if you prefer
+        }
+
+        // Flip everything on (or off) if that's your intent
+        HudConfig.INSTANCE.chosenSymbols.replaceAll((k, v) -> true);
+
+
         LOGGER.info("HUD config reset to default values.");
     }
 
@@ -72,7 +91,7 @@ public class HudconfigManager {
     public void saveSystem(){
 
         Gson gson = new Gson();
-        Path configPath = FabricLoader.getInstance().getConfigDir().resolve("shadestepper_hud_config.json");
+        Path configPath = FabricLoader.getInstance().getConfigDir().resolve("wynnstacks-config.json");
         try (Reader reader = Files.newBufferedReader(configPath)) {
             HudConfig fileConfig = gson.fromJson(reader, HudConfig.class);
             compareConfig(fileConfig, HudConfig.INSTANCE);

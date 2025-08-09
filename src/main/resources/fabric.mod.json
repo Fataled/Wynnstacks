@@ -17,7 +17,7 @@
       "net.fataled.wynnstacks.Wynnstacks"
     ],
     "modmenu": [
-      "net.fataled.wynnstacks.client.WynnstacksModMenu"
+      "net.fataled.wynnstacks.client.Utilities.WynnstacksModMenu"
     ]
 
   },
@@ -31,12 +31,6 @@
   },
   "custom": {
     "modmenu": {
-      "parent": {
-        "id": "wynnstacks",
-        "name": "WynnStacks",
-        "description": "I'm here to solve some MASSIVE skill issue",
-        "icon": "assets/wynnstacks/icon.png"
-      },
       "update_checker": true
     }
   }

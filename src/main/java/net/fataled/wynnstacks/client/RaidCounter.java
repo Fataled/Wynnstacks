@@ -1,15 +1,17 @@
 package net.fataled.wynnstacks.client;
 
+import net.fataled.wynnstacks.client.Utilities.RaidModel;
+import net.fataled.wynnstacks.client.interfaces.RaidKind;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.fataled.wynnstacks.client.ChatReader.stripColors;
+import static net.fataled.wynnstacks.client.Utilities.ChatReader.stripColors;
 
 public class RaidCounter {
-    private static final Logger LOGGER = LogManager.getLogger("ShadestepperHUD");
+    private static final Logger LOGGER = LogManager.getLogger("RaidCounter");
     RaidModel raidModel = new RaidModel();
     private static final Map<String, Boolean> raidFlags = new HashMap<>();
 
@@ -41,7 +43,7 @@ public class RaidCounter {
     }
     private static final Map<String, String> titleToRaidCode = Map.of(
             "The Nameless Anomaly", "TNA",
-            "Orphion's Nexus of Light", "NOL",
+            "Orphion's Nexus of Light", "NoL",
             "The Canyon Colossus", "TCC",
             "Nest of The Grootslang", "NoTG"
     );
@@ -50,48 +52,41 @@ public class RaidCounter {
     private long lastCompletionTime = 0;
     private static final long COOLDOWN_MS = 5000; // 5 seconds
     private final long now = System.currentTimeMillis();
+
     public void checkRaidCompletion() {
+        long now = System.currentTimeMillis();   // <-- move inside
         String lastTitle = RaidModel.getLastTitle();
-
         if (!lastTitle.equalsIgnoreCase("Raid Completed!")) return;
-
-
         if (now - lastCompletionTime < COOLDOWN_MS) return;
 
         RaidKind activeRaid = RaidModel.getInstance().getCurrentRaid();
         if (activeRaid == null) {
-           // LOGGER.warn("[Raid] 'Raid Completed!' shown, but currentRaid is null.");
+            LOGGER.warn("[Raid] 'Raid Completed!' shown, but currentRaid is null.");
             return;
         }
 
         String raidCode = titleToRaidCode.getOrDefault(activeRaid.getEntryTitleRaw(), "UNKNOWN");
-        int current = raidCompletions.getOrDefault(raidCode, 0);
-        raidCompletions.put(raidCode, current + 1);
+        raidCompletions.put(raidCode, raidCompletions.getOrDefault(raidCode, 0) + 1);
         lastCompletionTime = now;
-
-       // LOGGER.info("[Raid] Completion counted for: {}", activeRaid.getRaidName());
+        LOGGER.info("[Raid] Completion counted for: {}", activeRaid.getRaidName());
     }
 
     public void checkRaidFailed() {
-        String lastTitle = RaidModel.getLastTitle();
-        String Cleaned = stripColors(lastTitle);
-
-        if (!Cleaned.equalsIgnoreCase("Raid Failed!")) return; // Not a new Fail event
-
+        long now = System.currentTimeMillis();   // <-- same here
+        String lastTitle = stripColors(RaidModel.getLastTitle());
+        if (!lastTitle.equalsIgnoreCase("Raid Failed!")) return;
         if (now - lastCompletionTime < COOLDOWN_MS) return;
 
         RaidKind activeRaid = RaidModel.getInstance().getCurrentRaid();
         if (activeRaid == null) {
-            //LOGGER.warn("[Raid] 'Raid Failed!' shown, but currentRaid is null.");
+            LOGGER.warn("[Raid] 'Raid Failed!' shown, but currentRaid is null.");
             return;
         }
 
         String raidCode = titleToRaidCode.getOrDefault(activeRaid.getEntryTitleRaw(), "UNKNOWN");
-        int current = raidFails.getOrDefault(raidCode, 0);
-        raidFails.put(raidCode, current + 1);
+        raidFails.put(raidCode, raidFails.getOrDefault(raidCode, 0) + 1);
         lastCompletionTime = now;
-
-       // LOGGER.info("[Raid] Failure counted for: {}", activeRaid.getRaidName());
+        LOGGER.info("[Raid] Failure counted for: {}", activeRaid.getRaidName());
     }
 
     public static void setActiveRaid(String raidName) {
@@ -103,13 +98,13 @@ public class RaidCounter {
     }
     public static int[] wins(){
         return new int[] {raidCompletions.getOrDefault("TNA", 0),
-                raidCompletions.getOrDefault("NOL", 0),
+                raidCompletions.getOrDefault("NoL", 0),
                 raidCompletions.getOrDefault("TCC", 0),
                 raidCompletions.getOrDefault("NoTG", 0)};
     }
     public static int[] fails(){
         return new int[] {raidFails.getOrDefault("TNA", 0),
-                raidFails.getOrDefault("NOL", 0),
+                raidFails.getOrDefault("NoL", 0),
                 raidFails.getOrDefault("TCC", 0),
                 raidFails.getOrDefault("NoTG", 0)};
     }

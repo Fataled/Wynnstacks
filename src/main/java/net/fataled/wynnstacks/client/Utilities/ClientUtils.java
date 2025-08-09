@@ -1,4 +1,4 @@
-package net.fataled.wynnstacks.client;
+package net.fataled.wynnstacks.client.Utilities;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.MinecraftClient;
@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public final class ClientUtils {
 
-    private static final org.apache.logging.log4j.Logger LOGGER = LogManager.getLogger("ShadestepperHUD");
+    private static final org.apache.logging.log4j.Logger LOGGER = LogManager.getLogger("ClientUtils");
 
     /** Returns the set of plain (no colours) player names in the tab‑list. */
     public static Set<String> getOnlinePlayerNames() {

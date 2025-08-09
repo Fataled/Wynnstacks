@@ -1,5 +1,6 @@
-package net.fataled.wynnstacks.client;
+package net.fataled.wynnstacks.client.Utilities;
 
+import net.fataled.wynnstacks.client.HudConfig.HudConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.DisplayEntity.TextDisplayEntity;
 import net.minecraft.util.math.Box;
@@ -9,9 +10,10 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 public class MobLabelUtils {
-    private static final Logger LOGGER = LogManager.getLogger("ShadestepperHUD");
+    private static final Logger LOGGER = LogManager.getLogger("MobLabelUtils");
     private static final double LABEL_RADIUS_XZ = 8.0;
     private static final double LABEL_RADIUS_Y = 30.0;
 
@@ -51,8 +53,16 @@ public class MobLabelUtils {
     );
 
     private static final Set<Integer> STAT_SYMBOLS = Set.of(
-            0x271C, 0x2248, 0x2699, 0x2620,
-            0xE03A, 0xE03F, 0xE03D, 0xE03C, 0xE043, 0x2694
+            0x271C, // 	✜
+            0x2248, // 	≈
+            0x2699, // ⚙
+            0x2620, // ☠
+            0xE03A, // Tricks
+            0xE03F, // Drained
+            0xE03D, // Enkindled
+            0xE03C, // Confusion
+            0xE043, // Contamination
+            0x2694  // ⚔
     );
 
     private static final Set<String> IGNORE_LABELS = Set.of(
@@ -107,8 +117,15 @@ public class MobLabelUtils {
                 .distinct()
                 .toList();
 
+        Set<Integer> enabled = enabledSymbols();
+        Set<Integer> allSyms = STAT_SYMBOLS; // or your existing STAT_SYMBOLS
+
         List<String> statLines = textLines.stream()
-                .filter(line -> line.codePoints().anyMatch(STAT_SYMBOLS::contains))
+                .map(line -> removeDisabledStatChunks(line, enabled, allSyms))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                // keep only lines that still have at least one stat symbol + a digit
+                .filter(line -> line.codePoints().anyMatch(allSyms::contains))
                 .filter(line -> line.codePoints().anyMatch(Character::isDigit))
                 .toList();
 
@@ -237,4 +254,54 @@ public class MobLabelUtils {
 
         return false;
     }
+    private static int parseHex(String key) {
+        String hex = key.startsWith("0x") ? key.substring(2) : key;
+        return Integer.parseInt(hex, 16);
+    }
+
+    private static Set<Integer> enabledSymbols() {
+        return HudConfig.INSTANCE.chosenSymbols.entrySet().stream()
+                .filter(Map.Entry::getValue)            // only enabled
+                .map(e -> parseHex(e.getKey()))        // hex -> int code point
+                .collect(Collectors.toSet());
+    }
+
+    private static String removeDisabledStatChunks(String line, Set<Integer> enabled, Set<Integer> allSymbols) {
+        if (line.isEmpty()) return line;
+
+        String[] tokens = line.split("\\s+");
+        StringBuilder out = new StringBuilder();
+
+        boolean skipping = false; // true = current chunk is disabled, drop tokens until next symbol
+
+        for (int i = 0; i < tokens.length; i++) {
+            String tok = tokens[i];
+            if (tok.isEmpty()) continue;
+
+            int firstCp = tok.codePointAt(0);
+            boolean tokenStartsWithSymbol = allSymbols.contains(firstCp);
+
+            if (tokenStartsWithSymbol) {
+                // new chunk starts here
+                boolean thisSymbolEnabled = enabled.contains(firstCp);
+                skipping = !thisSymbolEnabled;
+
+                if (!skipping) {
+                    // keep the symbol token itself
+                    if (out.length() > 0) out.append(' ');
+                    out.append(tok);
+                }
+                continue;
+            }
+
+            // normal value token
+            if (!skipping) {
+                if (out.length() > 0) out.append(' ');
+                out.append(tok);
+            }
+        }
+
+        return out.toString().trim();
+    }
+
 }

@@ -1,4 +1,4 @@
-package net.fataled.wynnstacks.client;
+package net.fataled.wynnstacks.client.HudConfig;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;

@@ -1,7 +1,9 @@
-package net.fataled.wynnstacks.client;
+package net.fataled.wynnstacks.client.Utilities;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.fataled.wynnstacks.client.HudConfig.HudConfig;
+import net.fataled.wynnstacks.client.HudConfig.HudconfigScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;

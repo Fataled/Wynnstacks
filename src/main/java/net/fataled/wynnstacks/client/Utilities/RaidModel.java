@@ -1,5 +1,7 @@
-package net.fataled.wynnstacks.client;
+package net.fataled.wynnstacks.client.Utilities;
 
+import net.fataled.wynnstacks.client.RaidCounter;
+import net.fataled.wynnstacks.client.interfaces.RaidKind;
 import net.fataled.wynnstacks.event.TitleHandler;
 import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
@@ -9,7 +11,7 @@ import java.util.List;
 
 public class RaidModel {
 
-    private static final Logger LOGGER = LogManager.getLogger("ShadestepperHUD");
+    private static final Logger LOGGER = LogManager.getLogger("RaidModel");
 
     private static RaidModel instance;  // <-- static reference for global access
     private RaidKind currentRaid;

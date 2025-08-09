@@ -1,5 +1,8 @@
 package net.fataled.wynnstacks.client;
 
+import net.fataled.wynnstacks.client.HudConfig.HudConfig;
+import net.fataled.wynnstacks.client.HudConfig.HudconfigManager;
+import net.fataled.wynnstacks.client.Utilities.*;
 import net.minecraft.text.Text;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
@@ -22,9 +25,9 @@ import java.util.List;
 
 
 public class WynnstacksClient implements ClientModInitializer {
-    private static final Logger LOGGER = LogManager.getLogger("ShadestepperHUD");
+    private static final Logger LOGGER = LogManager.getLogger("Wynnstacks");
     public static MySoundListener soundListener;
-    private static  RaidModel raidModel;
+    private static RaidModel raidModel;
     private RaidCounter raidCounter;
 
     @Override
@@ -41,7 +44,7 @@ public class WynnstacksClient implements ClientModInitializer {
                 .orElseThrow(() -> new IllegalStateException("Mod container not found"));
 
         ResourceManagerHelper.registerBuiltinResourcePack(
-                Identifier.of("minecraft:wynnstacks"),
+                Identifier.of("wynnstacks", "wynnstacks"),
                 container,
                 ResourcePackActivationType.ALWAYS_ENABLED
         );

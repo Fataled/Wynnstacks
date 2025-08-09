@@ -1,5 +1,6 @@
-package net.fataled.wynnstacks.client;
+package net.fataled.wynnstacks.client.Utilities;
 
+import net.fataled.wynnstacks.client.HudConfig.HudConfig;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
@@ -14,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 public class MySoundListener implements SoundInstanceListener {
-    private static final Logger LOGGER = LogManager.getLogger("ShadestepperHUD");
+    private static final Logger LOGGER = LogManager.getLogger("Sound Listener");
     private final MinecraftClient mc = MinecraftClient.getInstance();
 
     private static final Identifier SOUND_ONE =  Identifier.of("minecraft:block.end_portal.spawn");

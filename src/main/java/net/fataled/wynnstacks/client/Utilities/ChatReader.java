@@ -1,4 +1,4 @@
-package net.fataled.wynnstacks.client;
+package net.fataled.wynnstacks.client.Utilities;
 
 import com.mojang.authlib.GameProfile;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -12,7 +12,7 @@ import java.util.concurrent.CompletableFuture;
 import java.time.Instant;
 
 public class ChatReader {
-    private static final Logger LOGGER = LogManager.getLogger("ShadestepperHUD");
+    private static final Logger LOGGER = LogManager.getLogger("Chat Reader");
 
     public static CompletableFuture<String> detectGameChat() {
         CompletableFuture<String> future = new CompletableFuture<>();

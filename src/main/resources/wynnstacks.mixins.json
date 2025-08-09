@@ -4,7 +4,6 @@
   "package": "net.fataled.wynnstacks.mixin",
   "compatibilityLevel": "JAVA_21",
   "mixins": [
-    "ClientConnectionMixin",
     "TitlePacketMixin"
   ],
   "client": [
