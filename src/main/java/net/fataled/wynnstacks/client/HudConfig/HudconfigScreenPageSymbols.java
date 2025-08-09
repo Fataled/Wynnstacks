@@ -5,7 +5,9 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.SliderWidget;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 
 import java.util.Map;
 
@@ -52,7 +54,8 @@ public class HudconfigScreenPageSymbols extends Screen {
             Runnable refreshLabel = () -> {
                 boolean enabled = HudConfig.INSTANCE.chosenSymbols.getOrDefault(key, false);
                 String label = icon + " (" + hex.toUpperCase() + ") [" + (enabled ? "ON" : "OFF") + "]";
-                holder[0].setMessage(Text.literal(label));
+                Text cleaned = stylePUAOnly(label);
+                holder[0].setMessage(cleaned);
             };
 
             ButtonWidget btn = ButtonWidget.builder(Text.literal("..."), b -> {
@@ -79,6 +82,29 @@ public class HudconfigScreenPageSymbols extends Screen {
         this.renderBackground(context, mouseX, mouseY, delta);
         context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 20, 0xFFFFFF);
         super.render(context, mouseX, mouseY, delta);
+    }
+
+    private static final Identifier PUA_FONT = Identifier.of("wynnstacks","stat_icons");
+
+    private static boolean isPUA(int cp) { return cp >= 0xE000 && cp <= 0xF8FF; }
+
+    public static Text stylePUAOnly(String s) {
+        MutableText out = Text.empty();
+        int i = 0, n = s.length();
+        while (i < n) {
+            int j = i;
+            boolean pua = isPUA(s.codePointAt(i));
+            while (j < n) {
+                int cp = s.codePointAt(j);
+                if (isPUA(cp) != pua) break;
+                j += Character.charCount(cp);
+            }
+            MutableText seg = Text.literal(s.substring(i, j));
+            if (pua) seg = seg.styled(st -> st.withFont(PUA_FONT)); // <- force your sheet
+            out.append(seg);
+            i = j;
+        }
+        return out;
     }
 }
 

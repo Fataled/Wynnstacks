@@ -71,7 +71,7 @@ public class HudconfigManager {
             HudConfig.INSTANCE.chosenSymbols = new LinkedHashMap<>();
         }
         // Seed your default keys (strings are safest in JSON)
-        String[] defaultCodes = {"0x271C","0x2248","0x2699","0x2620","0xE03A","0xE03F","0xE03D","0xE03C","0xE043","0x2694"};
+        String[] defaultCodes = {"0x271C","0x2248","0x2699","0x2620","0xE03A","0xE03F","0xE03D","0xE03C","0x2694"};
         for (String code : defaultCodes) {
             HudConfig.INSTANCE.chosenSymbols.putIfAbsent(code, true); // or false if you prefer
         }
