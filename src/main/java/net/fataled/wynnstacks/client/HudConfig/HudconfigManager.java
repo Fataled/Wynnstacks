@@ -76,7 +76,7 @@ public class HudconfigManager {
             HudConfig.INSTANCE.chosenSymbols.putIfAbsent(code, true); // or false if you prefer
         }
 
-        // Flip everything on (or off) if that's your intent
+        // Flip everything on (or off)
         HudConfig.INSTANCE.chosenSymbols.replaceAll((k, v) -> true);
 
 

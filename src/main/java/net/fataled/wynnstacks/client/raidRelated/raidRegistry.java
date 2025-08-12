@@ -1,10 +1,10 @@
-package net.fataled.wynnstacks.client.Utilities;
+package net.fataled.wynnstacks.client.raidRelated;
 
 import net.fataled.wynnstacks.client.interfaces.RaidKind;
-import net.fataled.wynnstacks.client.raids.NoL;
-import net.fataled.wynnstacks.client.raids.NoTG;
-import net.fataled.wynnstacks.client.raids.TCC;
-import net.fataled.wynnstacks.client.raids.TNA;
+import net.fataled.wynnstacks.client.raidRelated.raids.NoL;
+import net.fataled.wynnstacks.client.raidRelated.raids.NoTG;
+import net.fataled.wynnstacks.client.raidRelated.raids.TCC;
+import net.fataled.wynnstacks.client.raidRelated.raids.TNA;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

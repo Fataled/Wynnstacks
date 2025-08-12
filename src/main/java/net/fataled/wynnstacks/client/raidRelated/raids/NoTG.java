@@ -1,4 +1,4 @@
-package net.fataled.wynnstacks.client.raids;
+package net.fataled.wynnstacks.client.raidRelated.raids;
 
 import net.fataled.wynnstacks.client.interfaces.RaidKind;
 

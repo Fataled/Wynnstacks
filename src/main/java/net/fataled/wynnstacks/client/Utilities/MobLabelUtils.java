@@ -120,7 +120,7 @@ public class MobLabelUtils {
         Set<Integer> enabled = enabledSymbols();
         Set<Integer> allSyms = STAT_SYMBOLS; // or your existing STAT_SYMBOLS
 
-        List<String> statLines = textLines.stream()
+        return textLines.stream()
                 .map(line -> removeDisabledStatChunks(line, enabled, allSyms))
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
@@ -128,8 +128,6 @@ public class MobLabelUtils {
                 .filter(line -> line.codePoints().anyMatch(allSyms::contains))
                 .filter(line -> line.codePoints().anyMatch(Character::isDigit))
                 .toList();
-
-        return statLines;
     }
 
     private static boolean isAboveMob(Vec3d mobPos, Vec3d labelPos) {
@@ -172,7 +170,7 @@ public class MobLabelUtils {
             return labelCandidates.getFirst();
         }
 
-        String fallback = removeUnrenderableChars(stripColors(mob.getDisplayName().getString())).trim();
+        String fallback = removeUnrenderableChars(stripColors(Objects.requireNonNull(mob.getDisplayName()).getString())).trim();
         if (!fallback.isBlank()
                 && !fallback.startsWith("-")
                 && !fallback.startsWith("+")
@@ -230,9 +228,9 @@ public class MobLabelUtils {
         String line = s.trim();
 
         // Strong early check: short negative numbers with or without symbols
-        if (line.matches("^-[\\d]+(\\s*[\\p{So}\\p{Punct}]*)?$") && line.length() <= 8) return true;
+        if (line.matches("^-\\d+(\\s*[\\p{So}\\p{Punct}]*)?$") && line.length() <= 8) return true;
 
-        if (line.matches("^+[\\d]+(\\s*[\\p{So}\\p{Punct}]*)?$") && line.length() <= 8) return true;
+        if (line.matches("^+\\d+(\\s*[\\p{So}\\p{Punct}]*)?$") && line.length() <= 8) return true;
 
         // Check for damage-related keywords
         String lower = line.toLowerCase();
@@ -240,14 +238,7 @@ public class MobLabelUtils {
             return true;
         }
 
-        // Check for leading dash + stat symbol like ☠ or ✜
-        if (line.startsWith("-") && line.codePoints().anyMatch(STAT_SYMBOLS::contains)) {
-            return true;
-        }
-        if (line.startsWith("+") && line.codePoints().anyMatch(STAT_SYMBOLS::contains)) {
-            return true;
-        }
-        if (line.startsWith("[") && line.codePoints().anyMatch(STAT_SYMBOLS::contains)) {
+        if (line.startsWith("+") ||line.startsWith("[") || line.startsWith("-") && line.codePoints().anyMatch(STAT_SYMBOLS::contains)) {
             return true;
         }
 
@@ -274,8 +265,7 @@ public class MobLabelUtils {
 
         boolean skipping = false; // true = current chunk is disabled, drop tokens until next symbol
 
-        for (int i = 0; i < tokens.length; i++) {
-            String tok = tokens[i];
+        for (String tok : tokens) {
             if (tok.isEmpty()) continue;
 
             int firstCp = tok.codePointAt(0);
@@ -288,7 +278,7 @@ public class MobLabelUtils {
 
                 if (!skipping) {
                     // keep the symbol token itself
-                    if (out.length() > 0) out.append(' ');
+                    if (!out.isEmpty()) out.append(' ');
                     out.append(tok);
                 }
                 continue;
@@ -296,7 +286,7 @@ public class MobLabelUtils {
 
             // normal value token
             if (!skipping) {
-                if (out.length() > 0) out.append(' ');
+                if (!out.isEmpty()) out.append(' ');
                 out.append(tok);
             }
         }

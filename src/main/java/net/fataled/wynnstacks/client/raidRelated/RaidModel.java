@@ -1,4 +1,4 @@
-package net.fataled.wynnstacks.client.Utilities;
+package net.fataled.wynnstacks.client.raidRelated;
 
 import net.fataled.wynnstacks.client.RaidCounter;
 import net.fataled.wynnstacks.client.interfaces.RaidKind;
@@ -50,6 +50,7 @@ public class RaidModel {
     public RaidKind getCurrentRaid() {
         return currentRaid;
     }
+
     private static String lastTitle = "";
 
     public static void setLastTitle(String title) {

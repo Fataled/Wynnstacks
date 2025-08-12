@@ -1,6 +1,6 @@
 package net.fataled.wynnstacks.client;
 
-import net.fataled.wynnstacks.client.Utilities.RaidModel;
+import net.fataled.wynnstacks.client.raidRelated.RaidModel;
 import net.fataled.wynnstacks.client.interfaces.RaidKind;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -12,7 +12,6 @@ import static net.fataled.wynnstacks.client.Utilities.ChatReader.stripColors;
 
 public class RaidCounter {
     private static final Logger LOGGER = LogManager.getLogger("RaidCounter");
-    RaidModel raidModel = new RaidModel();
     private static final Map<String, Boolean> raidFlags = new HashMap<>();
 
     static {
@@ -96,6 +95,7 @@ public class RaidCounter {
     public static boolean isInRaid(String name) {
         return raidFlags.getOrDefault(name, false);
     }
+
     public static int[] wins(){
         return new int[] {raidCompletions.getOrDefault("TNA", 0),
                 raidCompletions.getOrDefault("NoL", 0),

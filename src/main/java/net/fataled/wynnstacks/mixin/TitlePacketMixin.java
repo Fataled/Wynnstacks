@@ -1,6 +1,6 @@
 package net.fataled.wynnstacks.mixin;
 
-import net.fataled.wynnstacks.client.Utilities.RaidModel;
+import net.fataled.wynnstacks.client.raidRelated.RaidModel;
 import net.fataled.wynnstacks.event.TitleHandler;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;

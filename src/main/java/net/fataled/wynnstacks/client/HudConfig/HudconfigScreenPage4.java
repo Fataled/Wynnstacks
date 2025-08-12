@@ -24,7 +24,7 @@ public class HudconfigScreenPage4 extends Screen {
 
         addDrawableChild(new SliderWidget(centerX - 225, y + 30, 200, 20,
                 Text.literal("Raid Counter Y: " + HudConfig.INSTANCE.rcY),
-                HudConfig.INSTANCE.rcY / screenHeight) {
+                (double) HudConfig.INSTANCE.rcY / screenHeight) {
             @Override
             protected void updateMessage() {
                 setMessage(Text.literal("Raid Counter Y: " + HudConfig.INSTANCE.rcY));
@@ -39,7 +39,7 @@ public class HudconfigScreenPage4 extends Screen {
 
         addDrawableChild(new SliderWidget(centerX -225, y, 200, 20,
                 Text.literal("Raid Counter X: " + HudConfig.INSTANCE.rcX),
-                HudConfig.INSTANCE.rcX / screenHeight) {
+                (double) HudConfig.INSTANCE.rcX / screenHeight) {
             @Override
             protected void updateMessage() {
                 setMessage(Text.literal("Raid Counter X: " + HudConfig.INSTANCE.rcX));

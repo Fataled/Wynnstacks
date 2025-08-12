@@ -2,7 +2,6 @@ package net.fataled.wynnstacks.client.HudConfig;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 

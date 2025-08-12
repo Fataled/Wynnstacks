@@ -24,13 +24,10 @@ public class HudconfigScreenPage2 extends Screen {
 
         // Add widgets for Page 2 here
         // Example:
-        addDrawableChild(ButtonWidget.builder(Text.literal("Back"), b -> {
-            MinecraftClient.getInstance().setScreen(parent);
-        }).position(centerX - 100, y + 140).size(200, 20).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("Back"), b ->
+                MinecraftClient.getInstance().setScreen(parent)).position(centerX - 100, y + 140).size(200, 20).build());
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("⚙"), b -> {
-            MinecraftClient.getInstance().setScreen(new HudconfigScreenPageSymbols(this.parent));
-        }).position(0, 0).size(50, 50).build());
+        addDrawableChild(ButtonWidget.builder(Text.literal("⚙"), b -> MinecraftClient.getInstance().setScreen(new HudconfigScreenPageSymbols(this.parent))).position(0, 0).size(50, 50).build());
 
         addDrawableChild(new SliderWidget(centerX - 225, y, 200, 20,
                 Text.literal("X: " + HudConfig.INSTANCE.x),
@@ -79,7 +76,7 @@ public class HudconfigScreenPage2 extends Screen {
 
         addDrawableChild(new SliderWidget(centerX + 25, y + 30, 200, 20,
                 Text.literal("Angle: " + HudConfig.INSTANCE.coneAngleDeg),
-                HudConfig.INSTANCE.coneAngleDeg / 180) {
+                (double) HudConfig.INSTANCE.coneAngleDeg / 180) {
             @Override
             protected void updateMessage() {
                 setMessage(Text.literal("Angle: " + HudConfig.INSTANCE.coneAngleDeg));
