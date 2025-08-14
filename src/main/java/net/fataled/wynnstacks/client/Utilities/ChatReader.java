@@ -48,4 +48,6 @@ public class ChatReader {
     public static String removeUnrenderableChars(String input) {
         return input.codePoints().filter((cp) -> cp >= 32 && cp <= 126 || Character.isWhitespace(cp)).collect(StringBuilder::new, StringBuilder::appendCodePoint, StringBuilder::append).toString();
     }
+
+    //public void IngoreShouts()
 }

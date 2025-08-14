@@ -2,6 +2,7 @@ package net.fataled.wynnstacks.client;
 
 import net.fataled.wynnstacks.client.raidRelated.RaidModel;
 import net.fataled.wynnstacks.client.interfaces.RaidKind;
+import net.minecraft.client.MinecraftClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -11,6 +12,16 @@ import java.util.Map;
 import static net.fataled.wynnstacks.client.Utilities.ChatReader.stripColors;
 
 public class RaidCounter {
+
+    public void RaidChecks(MinecraftClient mc) {
+        if (mc == null || mc.world == null || mc.player == null) return;
+        checkRaidFailed(mc);
+        checkRaidCompletion(mc);
+        // ... checkRaidWin(mc) etc.
+    }
+
+
+
     private static final Logger LOGGER = LogManager.getLogger("RaidCounter");
     private static final Map<String, Boolean> raidFlags = new HashMap<>();
 
@@ -52,7 +63,7 @@ public class RaidCounter {
     private static final long COOLDOWN_MS = 5000; // 5 seconds
     private final long now = System.currentTimeMillis();
 
-    public void checkRaidCompletion() {
+    public void checkRaidCompletion(MinecraftClient mc) {
         long now = System.currentTimeMillis();   // <-- move inside
         String lastTitle = RaidModel.getLastTitle();
         if (!lastTitle.equalsIgnoreCase("Raid Completed!")) return;
@@ -70,7 +81,7 @@ public class RaidCounter {
         LOGGER.info("[Raid] Completion counted for: {}", activeRaid.getRaidName());
     }
 
-    public void checkRaidFailed() {
+    public void checkRaidFailed(MinecraftClient mc) {
         long now = System.currentTimeMillis();   // <-- same here
         String lastTitle = stripColors(RaidModel.getLastTitle());
         if (!lastTitle.equalsIgnoreCase("Raid Failed!")) return;

@@ -11,6 +11,7 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.fataled.wynnstacks.client.raidRelated.RaidModel;
 import net.fataled.wynnstacks.client.rendering.HudRender;
 import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
@@ -30,7 +31,8 @@ public class WynnstacksClient implements ClientModInitializer {
         KeybindManager.register();
         HudconfigManager saveSystem = new HudconfigManager();
         raidCounter = new RaidCounter();
-        HudRender.registerDeprecatedHudCallback();
+        RaidModel raidModel = new RaidModel();
+        HudRender.registerHudCallback();
 
 
         // Register resource pack
@@ -53,12 +55,14 @@ public class WynnstacksClient implements ClientModInitializer {
 
         // Tick countdown
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            if(client == null) return;
+            try{
+                raidCounter.RaidChecks(client);
+            } catch (Throwable t){
+                WynnstacksClient.LOGGER.error("RaidCounter tick failed Check, {}", t.getMessage());
+            }
             if (soundListener != null) {
                 soundListener.tick();
-            }
-            if (raidCounter != null) {
-                raidCounter.checkRaidCompletion();
-                raidCounter.checkRaidFailed();
             }
             // Auto boss check when sound is triggered
             if(Autosave > 0) {
