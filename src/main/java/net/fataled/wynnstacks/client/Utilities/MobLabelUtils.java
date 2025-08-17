@@ -127,6 +127,7 @@ public class MobLabelUtils {
                 // keep only lines that still have at least one stat symbol + a digit
                 .filter(line -> line.codePoints().anyMatch(allSyms::contains))
                 .filter(line -> line.codePoints().anyMatch(Character::isDigit))
+               // .peek(line -> {LOGGER.info("stats {}", textLines);})
                 .toList();
     }
 

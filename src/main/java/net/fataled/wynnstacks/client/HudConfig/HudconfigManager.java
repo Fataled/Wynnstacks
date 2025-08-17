@@ -65,6 +65,7 @@ public class HudconfigManager {
         HudConfig.INSTANCE.rcS = 1.0f;
         HudConfig.INSTANCE.rcX = 0;
         HudConfig.INSTANCE.rcY = 0;
+        HudConfig.INSTANCE.showSatsujinHud = true;
 
         // Ensure map exists and has keys before replaceAll
         if (HudConfig.INSTANCE.chosenSymbols == null) {

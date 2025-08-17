@@ -18,6 +18,7 @@ public class HudConfig {
     @SerializedName("coneAngleDeg") public int coneAngleDeg = 30;
     @SerializedName("ignorePlayers") public boolean ignorePlayers = true;
     @SerializedName("showHud") public boolean showHud = true;
+    @SerializedName("showSatsujinHud") public boolean showSatsujinHud = true;
     @SerializedName("AspectLvl2") public boolean AspectLvl2 = false;
     @SerializedName("Satx") public int Satx = 0;
     @SerializedName("Saty") public int Saty = 40;

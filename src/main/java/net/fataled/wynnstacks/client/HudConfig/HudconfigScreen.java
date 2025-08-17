@@ -67,9 +67,6 @@ public class HudconfigScreen extends Screen {
         inputbox.setUneditableColor(0xAAAAAA);
         this.addDrawableChild(inputbox);
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Show Hud"), button ->
-                HudConfig.INSTANCE.showHud = !HudConfig.INSTANCE.showHud).position(centerX - 50, y + 70).size(95, 20).build());
-
     }
 
 
@@ -82,7 +79,6 @@ public class HudconfigScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         this.renderBackground(context, mouseX, mouseY, delta);
         context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 20, 0xFFFFFF);
-        context.drawCenteredTextWithShadow(this.textRenderer,"Hud Shown: " + HudConfig.INSTANCE.showHud, this.width / 2, 40, 0xFFFFFF);
         super.render(context, mouseX, mouseY, delta);
     }
 }

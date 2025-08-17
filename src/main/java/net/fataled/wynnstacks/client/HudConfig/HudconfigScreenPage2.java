@@ -89,6 +89,11 @@ public class HudconfigScreenPage2 extends Screen {
             }
         });
 
+        addDrawableChild(ButtonWidget.builder(Text.literal("Show Hud: " + HudConfig.INSTANCE.showHud), button -> {
+            HudConfig.INSTANCE.showHud = !HudConfig.INSTANCE.showHud;
+            button.setMessage(Text.literal("Show Hud: " + HudConfig.INSTANCE.showHud));
+        }).position(centerX - 50, y + 70).size(95, 20).build());
+
 
     }
 

@@ -55,7 +55,12 @@ public class HudconfigScreenPage3 extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("Aspect LVL 2: " + HudConfig.INSTANCE.AspectLvl2), button -> {
             HudConfig.INSTANCE.AspectLvl2 = !HudConfig.INSTANCE.AspectLvl2;
             button.setMessage(Text.literal("Aspect LVL 2: " + HudConfig.INSTANCE.AspectLvl2));
-        }).position(centerX - 50, y + 90).size(95, 20).build());
+        }).position(centerX - 100, y + 90).size(95, 20).build());
+
+        addDrawableChild(ButtonWidget.builder(Text.literal("Show Hud: " + HudConfig.INSTANCE.showSatsujinHud), button -> {
+            HudConfig.INSTANCE.showSatsujinHud = !HudConfig.INSTANCE.showSatsujinHud;
+            button.setMessage(Text.literal("Show Hud: " + HudConfig.INSTANCE.showSatsujinHud));
+        }).position(centerX, y + 90).size(95, 20).build());
 
         addDrawableChild(new SliderWidget(centerX + 25, y + 30, 200, 20,
                 Text.literal("Volume: " + String.format("%.0f",HudConfig.INSTANCE.Volume)+ "%"),

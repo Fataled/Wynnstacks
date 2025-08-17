@@ -38,74 +38,75 @@ public class HudRender {
     }
 
     public void Render(DrawContext drawContext, RenderTickCounter tickDelta) {
-            MinecraftClient mc = MinecraftClient.getInstance();
-            if (mc.player == null || mc.world == null) return;
+        MinecraftClient mc = MinecraftClient.getInstance();
+        if (mc.player == null || mc.world == null) return;
 
-            // 1) Raid counter block
-            renderRaidCounter(drawContext, mc.textRenderer);
+        // 1) Raid counter block
+        renderRaidCounter(drawContext, mc.textRenderer);
 
-            // 2) Acquire target + build live lines
-            Entity target = RaycastUtils.getLookedAtEntity(
-                    mc,
-                    HudConfig.INSTANCE.range,
-                    HudConfig.INSTANCE.coneAngleDeg,
-                    HudConfig.INSTANCE.ignorePlayers
-            );
+        // 2) Acquire target + build live lines
+        Entity target = RaycastUtils.getLookedAtEntity(
+                mc,
+                HudConfig.INSTANCE.range,
+                HudConfig.INSTANCE.coneAngleDeg,
+                HudConfig.INSTANCE.ignorePlayers
+        );
 
-            long currentTick = mc.world.getTime();
-            List<String> liveLines = List.of();
-            UUID currentId = null;
+        long currentTick = mc.world.getTime();
+        List<String> liveLines = List.of();
+        UUID currentId = null;
 
-            if (target != null) {
-                List<String> statLines = MobLabelUtils.getStatLines(target);
-                if (!statLines.isEmpty()) {
-                    String label = MobLabelUtils.removeUnrenderableChars(
-                            MobLabelUtils.getEntityLabelName(target)
-                    ).trim();
-                    if (!label.isBlank()) {
-                        statLines = new ArrayList<>(statLines);
-                        statLines.addFirst(label);
-                    }
-                    liveLines = statLines;
-                    currentId = target.getUuid();
+        if (target != null) {
+            List<String> statLines = MobLabelUtils.getStatLines(target);
+            if (!statLines.isEmpty()) {
+                String label = MobLabelUtils.removeUnrenderableChars(
+                        MobLabelUtils.getEntityLabelName(target)
+                ).trim();
+                if (!label.isBlank()) {
+                    statLines = new ArrayList<>(statLines);
+                    statLines.addFirst(label);
                 }
+                liveLines = statLines;
+                currentId = target.getUuid();
             }
+        }
 
-            // 3) Linger/cache logic
-            boolean hasValidTarget = currentId != null && !liveLines.isEmpty();
-            if (hasValidTarget) {
-                if (!currentId.equals(lastTargetId)) lastTargetId = currentId; // instant switch
-                cachedLines = new ArrayList<>(liveLines);
-                holdUntilTick = currentTick + HOLD_TICKS;
-            } else if (currentTick > holdUntilTick) {
-                lastTargetId = null;
-                cachedLines = java.util.Collections.emptyList();
+        // 3) Linger/cache logic
+        boolean hasValidTarget = currentId != null && !liveLines.isEmpty();
+        if (hasValidTarget) {
+            if (!currentId.equals(lastTargetId)) lastTargetId = currentId; // instant switch
+            cachedLines = new ArrayList<>(liveLines);
+            holdUntilTick = currentTick + HOLD_TICKS;
+        } else if (currentTick > holdUntilTick) {
+            lastTargetId = null;
+            cachedLines = java.util.Collections.emptyList();
+        }
+
+        // 4) Draw HUD (live or cached), movable via HudConfig x/y and scale
+        if (HudConfig.INSTANCE.showHud && !cachedLines.isEmpty()) {
+            MatrixStack ms = drawContext.getMatrices();
+            TextRenderer font = mc.textRenderer;
+
+            ms.push();
+            ms.scale(HudConfig.INSTANCE.scale, HudConfig.INSTANCE.scale, 1.0F);
+
+            int x = HudConfig.INSTANCE.x;
+            int y = HudConfig.INSTANCE.y;
+            int lineheight = mc.textRenderer.fontHeight + 3;
+            int color = HudConfig.INSTANCE.color;
+
+            for (String line : cachedLines) {
+                String cleaned = MobLabelUtils.removeUnrenderableChars(line).trim();
+                if (cleaned.isEmpty()) continue;
+                Text styled = stylePUAOnly(cleaned);
+                drawContext.drawTextWithShadow(font, styled, x, y, color);
+                y += lineheight;
             }
+            ms.pop();
+        }
 
-            // 4) Draw HUD (live or cached), movable via HudConfig x/y and scale
-            if (HudConfig.INSTANCE.showHud && !cachedLines.isEmpty()) {
-                MatrixStack ms = drawContext.getMatrices();
-                TextRenderer font = mc.textRenderer;
-
-                ms.push();
-                ms.scale(HudConfig.INSTANCE.scale, HudConfig.INSTANCE.scale, 1.0F);
-
-                int x = HudConfig.INSTANCE.x;
-                int y = HudConfig.INSTANCE.y;
-                int lineheight = mc.textRenderer.fontHeight + 3;
-                int color = HudConfig.INSTANCE.color;
-
-                for (String line : cachedLines) {
-                    String cleaned = MobLabelUtils.removeUnrenderableChars(line).trim();
-                    if (cleaned.isEmpty()) continue;
-                    Text styled = stylePUAOnly(cleaned);
-                    drawContext.drawTextWithShadow(font, styled, x, y, color);
-                    y += lineheight;
-                }
-                ms.pop();
-            }
-
-            // 5) Satsujin timer
+        // 5) Satsujin timer
+        if (HudConfig.INSTANCE.showSatsujinHud) {
             if (WynnstacksClient.soundListener != null && WynnstacksClient.soundListener.getCountdownTicks() > 0) {
                 MatrixStack ms = drawContext.getMatrices();
                 TextRenderer font = mc.textRenderer;
@@ -121,6 +122,7 @@ public class HudRender {
                 ms.pop();
             }
         }
+    }
 
         private void renderRaidCounter(DrawContext drawContext, TextRenderer font) {
             if (!HudConfig.INSTANCE.showRaidCounter) return;

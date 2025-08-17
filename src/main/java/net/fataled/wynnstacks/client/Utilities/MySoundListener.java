@@ -12,7 +12,9 @@ import net.minecraft.util.Identifier;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import java.util.List;
-import java.util.Optional;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class MySoundListener implements SoundInstanceListener {
     private static final Logger LOGGER = LogManager.getLogger("Sound Listener");
@@ -22,6 +24,8 @@ public class MySoundListener implements SoundInstanceListener {
     private static final Identifier SOUND_TWO =  Identifier.of("minecraft:block.enchantment_table.use");
 
     private static final int MAX_TICKS_BETWEEN = 10;
+
+    private static final Pattern HEART_4_TO_9 = Pattern.compile("✜\\s*[4-9]");
 
     private long lastSoundOneTick = -100;
     private long lastSoundTwoTick = -100;
@@ -53,39 +57,38 @@ public class MySoundListener implements SoundInstanceListener {
                 //   but for simplicity you can do it here if thread-safe.
 
                 // ① look for any high-priority entity in range
-                List<Entity> nearby = mc.world.getOtherEntities(
-                        mc.player,
-                        mc.player.getBoundingBox().expand(HudConfig.INSTANCE.range),
-                        Entity::isAlive
+                Entity nearby = RaycastUtils.getLookedAtEntity(
+                        mc,
+                        HudConfig.INSTANCE.range,
+                        HudConfig.INSTANCE.coneAngleDeg,
+                        HudConfig.INSTANCE.ignorePlayers
                 );
-                Optional<Entity> priority = MobLabelUtils.getHighestPriorityEntity(nearby);
 
-                String label = null;
-                if (priority.isPresent()) {
-                    label = MobLabelUtils.getEntityLabelName(priority.get());
-                } else {
-                    // ② fallback to ray cast
-                    Entity looked = RaycastUtils.getLookedAtEntity(
-                            mc, HudConfig.INSTANCE.range, HudConfig.INSTANCE.coneAngleDeg, HudConfig.INSTANCE.ignorePlayers
-                    );
-                    if (looked != null) {
-                        label = MobLabelUtils.getEntityLabelName(looked);
-                    }
-                }
+                if (nearby == null) return;
 
-                // ③ if label matches your boss keywords, start the countdown
-                if (label != null) {
-                    String cleaned = label.toLowerCase();
-                    for (String kw : MobLabelUtils.PRIORITY_LABELS) {
-                        if (cleaned.contains(kw)) {
-                            //LOGGER.info("[SoundListener] Matched priority label: {} → starting countdown", kw);
-                            startCountdown();
-                            break;
-                        }
-                    }
+                String label = MobLabelUtils.getEntityLabelName(nearby);
+                List<String> stats = MobLabelUtils.getStatLines(nearby);
+                CheckAndStartCountdown(label, stats);
                 }
             }
         }
+
+    public void CheckAndStartCountdown(String label, List<String> stats) {
+
+        if(label == null || stats == null || stats.isEmpty()) return;
+        String cleaned = label.toLowerCase(Locale.ROOT);
+
+        boolean hasPriority = MobLabelUtils.PRIORITY_LABELS.stream().anyMatch(kw -> cleaned.contains(kw));
+        //LOGGER.info("name: {}", cleaned);
+        if(!hasPriority) return;
+
+        boolean hasMarks = stats.stream().filter(Objects::nonNull).anyMatch(s -> HEART_4_TO_9.matcher(s).find());
+        //LOGGER.info("[In Check] Label: {} Stats: {}", label, stats);
+        if(hasMarks) {
+            startCountdown();
+        }
+
+
     }
 
     private void startCountdown() {
