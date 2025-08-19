@@ -23,18 +23,7 @@ public final class ClientUtils {
                 .map(PlayerListEntry::getProfile)
                 .map(GameProfile::getName)
                 .collect(Collectors.toUnmodifiableSet());
-
     }
-
-    public static void Online(){
-        ClientPlayerEntity player = MinecraftClient.getInstance().player;
-        Set<String> Gamers= getOnlinePlayerNames();
-
-        if (Gamers.contains("AverageGisu")) {
-            player.sendMessage(Text.literal("AAAAHHHH ITS GISU RUNNNN"), false);
-        }
-    }
-
 }
 
 

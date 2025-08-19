@@ -13,22 +13,15 @@ import org.lwjgl.glfw.GLFW;
 public class KeybindManager {
 
     public static KeyBinding openHudConfig;
-    public static KeyBinding toggleDebug;
 
 
     public static void register() {
         openHudConfig = registerKey("Key.hud.open_config", GLFW.GLFW_KEY_H);
-        toggleDebug = registerKey("key.shadestepperqol.toggleDebug", GLFW.GLFW_KEY_F7);
-
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
 
             if (openHudConfig.wasPressed()) {
                 client.setScreen(new HudconfigScreen(client.currentScreen));
-            }
-
-            while (toggleDebug.wasPressed()) {
-                HudConfig.INSTANCE.debug = !HudConfig.INSTANCE.debug;
             }
 
         });

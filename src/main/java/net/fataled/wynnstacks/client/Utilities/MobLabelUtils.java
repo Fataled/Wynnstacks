@@ -16,6 +16,7 @@ public class MobLabelUtils {
     private static final Logger LOGGER = LogManager.getLogger("MobLabelUtils");
     private static final double LABEL_RADIUS_XZ = 8.0;
     private static final double LABEL_RADIUS_Y = 30.0;
+    private static final IgnPattern ign =  new IgnPattern();
 
     public static final List<String> PRIORITY_LABELS = List.of(
             // Legendary Island / Altar bosses (end-game)
@@ -94,8 +95,6 @@ public class MobLabelUtils {
         }
 
         TextDisplayEntity label = closestLabel.get();
-        Vec3d labelPos = label.getPos();
-        //LOGGER.info("[HUD Debug] Using label '{}' at {}", label.getText().getString(), labelPos);
 
         if (isProbablyDamageLine(label.getText().getString())) {
             //LOGGER.info("[HUD Debug] Rejected full-line label as damage: '{}'", label.getText().getString());
@@ -158,6 +157,7 @@ public class MobLabelUtils {
                 .map(String::trim)
                 .filter(s -> !s.isEmpty())
                 .filter(s -> IGNORE_LABELS.stream().noneMatch(ign -> s.toLowerCase().contains(ign)))
+                .filter(s -> s != null && !ign.getPattern().matcher(s).find())
                 .filter(s -> !isProbablyDamageLine(s))
                 //.filter(s -> s.startsWith("["))
                 .toList();
@@ -187,26 +187,6 @@ public class MobLabelUtils {
                 .map(String::toLowerCase)
                 .filter(line -> PRIORITY_LABELS.stream().anyMatch(line::contains))
                 .findFirst();
-    }
-
-    public static Optional<Entity> getHighestPriorityEntity(List<Entity> entities) {
-        for (Entity entity : entities) {
-            String label = getEntityLabelName(entity).toLowerCase();
-            for (String keyword : PRIORITY_LABELS) {
-                if (label.contains(keyword)) {
-                    return Optional.of(entity);
-                }
-            }
-        }
-
-        for (Entity entity : entities) {
-            String label = getEntityLabelName(entity);
-            if (!label.isBlank()) {
-                return Optional.of(entity);
-            }
-        }
-
-        return Optional.empty();
     }
 
     public static String stripColors(String input) {

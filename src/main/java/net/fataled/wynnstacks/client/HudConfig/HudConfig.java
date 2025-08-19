@@ -14,7 +14,7 @@ public class HudConfig {
     @SerializedName("scale") public float scale = 1.0f;
     @SerializedName("Target Distance") public float maxTargetDistance = 72.0f;
     @SerializedName("debug") public boolean debug = false;
-    @SerializedName("range") public double range = 72.0;   // blocks
+    @SerializedName("range") public double range = 24.0;   // blocks
     @SerializedName("coneAngleDeg") public int coneAngleDeg = 30;
     @SerializedName("ignorePlayers") public boolean ignorePlayers = true;
     @SerializedName("showHud") public boolean showHud = true;

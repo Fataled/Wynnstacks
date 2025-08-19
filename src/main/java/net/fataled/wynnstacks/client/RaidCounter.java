@@ -9,15 +9,12 @@ import org.apache.logging.log4j.Logger;
 import java.util.HashMap;
 import java.util.Map;
 
-import static net.fataled.wynnstacks.client.Utilities.ChatReader.stripColors;
-
 public class RaidCounter {
 
     public void RaidChecks(MinecraftClient mc) {
         if (mc == null || mc.world == null || mc.player == null) return;
         checkRaidFailed(mc);
         checkRaidCompletion(mc);
-        // ... checkRaidWin(mc) etc.
     }
 
 
@@ -108,15 +105,21 @@ public class RaidCounter {
     }
 
     public static int[] wins(){
-        return new int[] {raidCompletions.getOrDefault("TNA", 0),
+        return new int[] {
+                raidCompletions.getOrDefault("TNA", 0),
                 raidCompletions.getOrDefault("NoL", 0),
                 raidCompletions.getOrDefault("TCC", 0),
                 raidCompletions.getOrDefault("NoTG", 0)};
     }
     public static int[] fails(){
-        return new int[] {raidFails.getOrDefault("TNA", 0),
+        return new int[] {
+                raidFails.getOrDefault("TNA", 0),
                 raidFails.getOrDefault("NoL", 0),
                 raidFails.getOrDefault("TCC", 0),
                 raidFails.getOrDefault("NoTG", 0)};
+    }
+
+    public static String stripColors(String input) {
+        return input.replaceAll("§[0-9a-fk-or]", "");
     }
 }
