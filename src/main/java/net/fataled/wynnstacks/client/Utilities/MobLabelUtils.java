@@ -3,59 +3,43 @@ package net.fataled.wynnstacks.client.Utilities;
 import net.fataled.wynnstacks.client.HudConfig.HudConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.DisplayEntity.TextDisplayEntity;
+import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.*;
-import java.util.Arrays;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class MobLabelUtils {
     private static final Logger LOGGER = LogManager.getLogger("MobLabelUtils");
+
     private static final double LABEL_RADIUS_XZ = 8.0;
     private static final double LABEL_RADIUS_Y = 30.0;
-    private static final IgnPattern ign =  new IgnPattern();
 
+    private static final double MAX_HORIZONTAL_DISTANCE_SQ = 1.5 * 1.5;
+    private static final double MIN_VERTICAL_OFFSET = 0.0;
+
+    // Keep all lower-case; we lower candidate strings once.
     public static final List<String> PRIORITY_LABELS = List.of(
-            // Legendary Island / Altar bosses (end-game)
-            "mummyboard",
-            "virus",
-            "accipientis",
-            "matrojan",
-            "titanium",
-            "death metal",
-            "mechorrupter",
-            "robob",
-            "cybel",
-            "legendary",
-            "yahya",
-            // Raid bosses
-            "grootslang",
-            "orphion",
-            "colossus",
-            "anomaly",
-            "parasite",
-            // Tower of Ascension / Other boss altars
-            "argaddon",
-            "witch",
-            "guardian",
-            "chained",
-            "alkevö",
-            "death",
-            "strato",
-            "qira",
-            "aledar",
-            "tasim",
-            "psychomancer",
-            // Test Dummy
+            "mummyboard","virus","accipientis","matrojan","titanium","death metal","mechorrupter","robob","cybel","legendary","yahya",
+            "grootslang","orphion","colossus","anomaly","parasite",
+            "argaddon","witch","guardian","chained","alkevö","death","strato","qira","aledar","tasim","psychomancer",
             "combat"
     );
 
+    private static final Set<String> IGNORE_LABELS = Set.of(
+            "weapon","shop","armoring","identifier","'s","merchant","market","bank","wood","tailoring",
+            "npc","text display","armor stand","item display","skeleton","dernic","dps","loot","totem","damage","arrow","wolf",
+            "slime","arming","lvl","cooking","rock","blacksmith","emerald","experience orb","bug","lv.","wybel"
+    );
+
+    // Code points for stat symbols; keep as boxed ints unless you want to pull in fastutil IntSets.
     private static final Set<Integer> STAT_SYMBOLS = Set.of(
-            0x271C, // 	✜
-            0x2248, // 	≈
+            0x271C, // ✜
+            0x2248, // ≈
             0x2699, // ⚙
             0x2620, // ☠
             0xE03A, // Tricks
@@ -66,213 +50,248 @@ public class MobLabelUtils {
             0x2694  // ⚔
     );
 
-    private static final Set<String> IGNORE_LABELS = Set.of(
-            "weapon", "shop", "armoring", "identifier", "'s",
-            "merchant", "market", "bank", "wood", "tailoring",
-            "npc", "text display", "armor stand", "item display",
-            "skeleton", "dernic", "dps", "loot", "totem", "damage", "arrow", "wolf",
-            "slime", "arming", "lvl", "cooking", "rock", "blacksmith", "emerald", "experience orb", "bug", "Lv.","wybel"
-    );
+    // Precompiled patterns (avoid recompiling every call)
+    private static final Pattern COLOR_CODES = Pattern.compile("§[0-9a-fk-or]");
+    private static final Pattern LINE_SPLIT = Pattern.compile("\\R");
+    private static final Pattern SHORT_NEG_NUM = Pattern.compile("^-\\d+(\\s*[\\p{So}\\p{Punct}]*)?$");
+    private static final Pattern SHORT_POS_NUM = Pattern.compile("^\\+\\d+(\\s*[\\p{So}\\p{Punct}]*)?$"); // FIXED: escaped '+'
+    private static final Pattern SECONDS_TAIL = Pattern.compile("\\b\\d+\\s*s\\b");
 
-    private static final double MAX_HORIZONTAL_DISTANCE_SQ = 1.5 * 1.5;
-    private static final double MIN_VERTICAL_OFFSET = 0.0;
+    private static final IgnPattern IGN_PATTERN = new IgnPattern(); // your existing impl
+
+    /* =========================
+       Public API
+       ========================= */
 
     public static List<String> getStatLines(Entity mob) {
-        Box box = mob.getBoundingBox().expand(LABEL_RADIUS_XZ, LABEL_RADIUS_Y, LABEL_RADIUS_XZ);
-        Vec3d mobPos = mob.getPos();
+        final Vec3d mobPos = mob.getPos();
+        final Box box = mob.getBoundingBox().expand(LABEL_RADIUS_XZ, LABEL_RADIUS_Y, LABEL_RADIUS_XZ);
 
-        Optional<TextDisplayEntity> closestLabel = mob.getWorld()
-                .getEntitiesByClass(TextDisplayEntity.class, box,
-                        td -> {
-                            String text = td.getText() != null ? td.getText().getString().trim() : "";
-                            return !text.isBlank() && !isProbablyDamageLine(text);
-                        })
-                .stream()
-                .min(Comparator.comparingDouble(td -> td.squaredDistanceTo(mobPos)));
+        // Collect candidates once
+        List<TextDisplayEntity> labels = mob.getWorld().getEntitiesByClass(
+                TextDisplayEntity.class, box,
+                td -> {
+                    Text t = td.getText();
+                    if (t == null) return false;
+                    String s = t.getString();
+                    if (s == null) return false;
+                    s = s.trim();
+                    return !s.isEmpty() && !isProbablyDamageLineFast(s);
+                }
+        );
 
-        if (closestLabel.isEmpty()) {
-            return List.of();
+        if (labels.isEmpty()) return List.of();
+
+        // Closest label (kept in case you want it for debugging/heuristics)
+        TextDisplayEntity closest = null;
+        double bestDistSq = Double.MAX_VALUE;
+        for (TextDisplayEntity td : labels) {
+            double dsq = td.squaredDistanceTo(mobPos);
+            if (dsq < bestDistSq) { bestDistSq = dsq; closest = td; }
         }
+        if (closest == null) return List.of();
 
-        TextDisplayEntity label = closestLabel.get();
+        // Build text lines aligned above mob
+        LinkedHashSet<String> lines = new LinkedHashSet<>(); // dedupe, preserve order
+        for (TextDisplayEntity td : labels) {
+            if (!isAboveMob(mobPos, td.getPos())) continue;
 
-        if (isProbablyDamageLine(label.getText().getString())) {
-            //LOGGER.info("[HUD Debug] Rejected full-line label as damage: '{}'", label.getText().getString());
-            return List.of();
+            String raw = safeString(td.getText());
+            if (raw.isEmpty()) continue;
+
+            // split and normalize each physical line
+            String[] parts = LINE_SPLIT.split(raw);
+            for (String part : parts) {
+                String stripped = stripColors(part);
+                String cleaned = removeUnrenderableChars(stripped, /*allowStatSymbols*/ true).trim();
+                if (!cleaned.isEmpty() && !isProbablyDamageLineFast(cleaned)) {
+                    lines.add(cleaned);
+                }
+            }
         }
+        if (lines.isEmpty()) return List.of();
 
-        List<String> textLines = mob.getWorld()
-                .getEntitiesByClass(TextDisplayEntity.class, box, td -> {
-                    String text = td.getText() != null ? td.getText().getString().trim() : "";
-                    boolean aligned = isAboveMob(mob.getPos(), td.getPos());
-                    return !text.isBlank() && aligned && !isProbablyDamageLine(text);
-                })
-                .stream()
-                .flatMap(td -> Arrays.stream(td.getText().getString().split("\\R")))
-                .map(MobLabelUtils::stripColors)
-                .map(MobLabelUtils::removeUnrenderableChars)
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .distinct()
-                .toList();
+        // Config-enabled symbols once
+        final Set<Integer> enabled = enabledSymbols();
+        final Set<Integer> allSyms = STAT_SYMBOLS;
 
-        Set<Integer> enabled = enabledSymbols();
-        Set<Integer> allSyms = STAT_SYMBOLS; // or your existing STAT_SYMBOLS
+        // Filter/stat-chunk stripping in one pass
+        ArrayList<String> out = new ArrayList<>(lines.size());
+        for (String line : lines) {
+            String pruned = removeDisabledStatChunks(line, enabled, allSyms);
+            if (pruned.isEmpty()) continue;
 
-        return textLines.stream()
-                .map(line -> removeDisabledStatChunks(line, enabled, allSyms))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                // keep only lines that still have at least one stat symbol + a digit
-                .filter(line -> line.codePoints().anyMatch(allSyms::contains))
-                .filter(line -> line.codePoints().anyMatch(Character::isDigit))
-               // .peek(line -> {LOGGER.info("stats {}", textLines);})
-                .toList();
+            // keep only lines that still have at least one stat symbol + a digit
+            boolean hasSym = containsAnyCodepoint(pruned, allSyms);
+            boolean hasDigit = containsDigit(pruned);
+            if (hasSym && hasDigit) out.add(pruned);
+        }
+        return out;
     }
+
+    public static String getEntityLabelName(Entity mob) {
+        final Box box = mob.getBoundingBox().expand(LABEL_RADIUS_XZ, LABEL_RADIUS_Y, LABEL_RADIUS_XZ);
+
+        List<TextDisplayEntity> labels = mob.getWorld().getEntitiesByClass(
+                TextDisplayEntity.class, box,
+                td -> td.getText() != null && !safeString(td.getText()).isEmpty()
+        );
+        if (labels.isEmpty()) return "";
+
+        LinkedHashSet<String> rawLines = new LinkedHashSet<>();
+        for (TextDisplayEntity td : labels) {
+            String raw = safeString(td.getText());
+            if (raw.isEmpty()) continue;
+            String[] parts = LINE_SPLIT.split(raw);
+            for (String part : parts) {
+                String cleaned = removeUnrenderableChars(stripColors(part), true).trim();
+                if (!cleaned.isEmpty()) rawLines.add(cleaned);
+            }
+        }
+        if (rawLines.isEmpty()) return "";
+
+        // Filter for candidates
+        ArrayList<String> candidates = new ArrayList<>(rawLines.size());
+        for (String s : rawLines) {
+            String t = s.trim();
+            if (t.isEmpty()) continue;
+            String lower = t.toLowerCase(Locale.ROOT);
+
+            if (SECONDS_TAIL.matcher(lower).find()) continue;
+            if (lower.startsWith("x2")) continue;
+            if (containsAny(lower, IGNORE_LABELS)) continue;
+            if (IGN_PATTERN.getPattern().matcher(t).find()) continue;
+            if (isProbablyDamageLineFast(t)) continue;
+
+            candidates.add(t);
+        }
+
+        // Priority match
+        for (String c : candidates) {
+            String lower = c.toLowerCase(Locale.ROOT);
+            if (containsAny(lower, PRIORITY_LABELS)) return c;
+        }
+
+        if (!candidates.isEmpty()) return candidates.getFirst();
+
+        // Fallback to mob display name (safe)
+        Text disp = mob.getDisplayName();
+        String fb = disp != null ? disp.getString() : "";
+        fb = removeUnrenderableChars(stripColors(fb), false).trim().toLowerCase(Locale.ROOT);
+
+        if (!fb.isEmpty() && !fb.startsWith("-") && !fb.startsWith("+") && !containsAny(fb, IGNORE_LABELS)) {
+            return fb;
+        }
+        return "";
+    }
+
+    /* =========================
+       Helpers
+       ========================= */
 
     private static boolean isAboveMob(Vec3d mobPos, Vec3d labelPos) {
         double dx = labelPos.x - mobPos.x;
         double dz = labelPos.z - mobPos.z;
         double horizontalSq = dx * dx + dz * dz;
         double verticalOffset = labelPos.y - mobPos.y;
-
         return horizontalSq <= MAX_HORIZONTAL_DISTANCE_SQ && verticalOffset >= MIN_VERTICAL_OFFSET;
     }
 
-    public static String getEntityLabelName(Entity mob) {
-        Box box = mob.getBoundingBox().expand(LABEL_RADIUS_XZ, LABEL_RADIUS_Y, LABEL_RADIUS_XZ);
-
-        List<String> rawCandidates = mob.getWorld()
-                .getEntitiesByClass(TextDisplayEntity.class, box,
-                        td -> td.getText() != null && !td.getText().getString().isBlank())
-                .stream()
-                .flatMap(td -> Arrays.stream(td.getText().getString().split("\\R")))
-                .map(MobLabelUtils::stripColors)
-                .map(MobLabelUtils::removeUnrenderableChars)
-                .map(String::trim)
-                .filter(s -> !s.isBlank())
-                .toList();
-
-        List<String> labelCandidates = rawCandidates.stream()
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .filter(s -> IGNORE_LABELS.stream().noneMatch(ign -> s.toLowerCase().contains(ign)))
-                .filter(s -> s != null && !ign.getPattern().matcher(s).find())
-                .filter(s -> !isProbablyDamageLine(s))
-                //.filter(s -> s.startsWith("["))
-                .toList();
-
-        Optional<String> priorityMatch = getPriorityNameFromLines(labelCandidates);
-        if (priorityMatch.isPresent()) {
-            return priorityMatch.get();
-        }
-
-        if (!labelCandidates.isEmpty()) {
-            return labelCandidates.getFirst();
-        }
-
-        String fallback = removeUnrenderableChars(stripColors(Objects.requireNonNull(mob.getDisplayName()).getString())).trim();
-        if (!fallback.isBlank()
-                && !fallback.startsWith("-")
-                && !fallback.startsWith("+")
-                && IGNORE_LABELS.stream().noneMatch(fallback.toLowerCase()::contains)) {
-            return fallback;
-        }
-
-        return "";
-    }
-
-    private static Optional<String> getPriorityNameFromLines(List<String> lines) {
-        return lines.stream()
-                .map(String::toLowerCase)
-                .filter(line -> PRIORITY_LABELS.stream().anyMatch(line::contains))
-                .findFirst();
-    }
-
     public static String stripColors(String input) {
-        return input.replaceAll("§[0-9a-fk-or]", "");
+        if (input == null || input.isEmpty()) return "";
+        return COLOR_CODES.matcher(input).replaceAll("");
     }
 
-    public static String removeUnrenderableChars(String input) {
-        return input.codePoints()
-                .filter(cp -> (cp >= 32 && cp <= 126)
-                        || STAT_SYMBOLS.contains(cp)
-                        || Character.isWhitespace(cp))
-                .collect(StringBuilder::new,
-                        StringBuilder::appendCodePoint,
-                        StringBuilder::append)
-                .toString();
+    public static String removeUnrenderableChars(String input, boolean allowStatSymbols) {
+        if (input == null || input.isEmpty()) return "";
+        final Set<Integer> allowed = allowStatSymbols ? STAT_SYMBOLS : Collections.emptySet();
+
+        StringBuilder sb = new StringBuilder(input.length());
+        input.codePoints().forEach(cp -> {
+            if ((cp >= 32 && cp <= 126) || Character.isWhitespace(cp) || allowed.contains(cp)) {
+                sb.appendCodePoint(cp);
+            }
+        });
+        return sb.toString();
     }
 
+    // Faster than running multiple regexes—cheap short-circuits first
     public static boolean isProbablyDamageLine(String s) {
+        return isProbablyDamageLineFast(s);
+    }
+
+    private static boolean isProbablyDamageLineFast(String s) {
         if (s == null) return false;
         String line = s.trim();
+        if (line.isEmpty()) return false;
 
-        // Strong early check: short negative numbers with or without symbols
-        if (line.matches("^-\\d+(\\s*[\\p{So}\\p{Punct}]*)?$") && line.length() <= 8) return true;
-
-        if (line.matches("^+\\d+(\\s*[\\p{So}\\p{Punct}]*)?$") && line.length() <= 8) return true;
-
-        // Check for damage-related keywords
-        String lower = line.toLowerCase();
-        if (lower.contains("lv.") || lower.contains("damage") || lower.contains("bleed") || lower.contains("burn")) {
+        // Strong early checks: short +/- numbers
+        if (line.length() <= 8 && (SHORT_NEG_NUM.matcher(line).matches() || SHORT_POS_NUM.matcher(line).matches()))
             return true;
-        }
 
-        if (line.startsWith("+") ||line.startsWith("[") || line.startsWith("-") && line.codePoints().anyMatch(STAT_SYMBOLS::contains)) {
+        String lower = line.toLowerCase(Locale.ROOT);
+        if (lower.contains("lv.") || lower.contains("damage") || lower.contains("bleed") || lower.contains("burn"))
             return true;
+
+        // Parentheses fix for operator precedence:
+        // trigger if starts with +/-/[ AND has a stat symbol somewhere
+        return (line.startsWith("+") || line.startsWith("[") || line.startsWith("-"))
+                && containsAnyCodepoint(line, STAT_SYMBOLS);
+    }
+
+    private static String safeString(Text t) {
+        String s = (t == null) ? "" : t.getString();
+        return (s == null) ? "" : s;
+    }
+
+    private static boolean containsAny(String haystackLower, Collection<String> needlesLower) {
+        for (String n : needlesLower) {
+            if (haystackLower.contains(n)) return true;
         }
-
-
         return false;
     }
+
+    private static boolean containsAnyCodepoint(String s, Set<Integer> cps) {
+        return s.codePoints().anyMatch(cps::contains);
+    }
+
+    private static boolean containsDigit(String s) {
+        return s.codePoints().anyMatch(Character::isDigit);
+    }
+
     private static int parseHex(String key) {
         String hex = key.startsWith("0x") ? key.substring(2) : key;
         return Integer.parseInt(hex, 16);
     }
 
     private static Set<Integer> enabledSymbols() {
+        // Compute once per call; if HudConfig changes rarely, consider caching with an epoch/version.
         return HudConfig.INSTANCE.chosenSymbols.entrySet().stream()
-                .filter(Map.Entry::getValue)            // only enabled
-                .map(e -> parseHex(e.getKey()))        // hex -> int code point
+                .filter(Map.Entry::getValue)
+                .map(e -> parseHex(e.getKey()))
                 .collect(Collectors.toSet());
     }
 
     private static String removeDisabledStatChunks(String line, Set<Integer> enabled, Set<Integer> allSymbols) {
-        if (line.isEmpty()) return line;
-
+        if (line == null || line.isEmpty()) return "";
         String[] tokens = line.split("\\s+");
-        StringBuilder out = new StringBuilder();
-
-        boolean skipping = false; // true = current chunk is disabled, drop tokens until next symbol
+        StringBuilder out = new StringBuilder(line.length());
+        boolean skipping = false;
 
         for (String tok : tokens) {
             if (tok.isEmpty()) continue;
 
             int firstCp = tok.codePointAt(0);
-            boolean tokenStartsWithSymbol = allSymbols.contains(firstCp);
+            boolean startsWithSymbol = allSymbols.contains(firstCp);
 
-            if (tokenStartsWithSymbol) {
-                // new chunk starts here
-                boolean thisSymbolEnabled = enabled.contains(firstCp);
-                skipping = !thisSymbolEnabled;
-
-                if (!skipping) {
-                    // keep the symbol token itself
-                    if (!out.isEmpty()) out.append(' ');
-                    out.append(tok);
-                }
-                continue;
+            if (startsWithSymbol) {
+                skipping = !enabled.contains(firstCp);
             }
-
-            // normal value token
             if (!skipping) {
                 if (!out.isEmpty()) out.append(' ');
                 out.append(tok);
             }
         }
-
         return out.toString().trim();
     }
-
 }

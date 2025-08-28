@@ -23,46 +23,46 @@ public class HudconfigScreenPage4 extends Screen {
         int y = this.height / 4;
 
         addDrawableChild(new SliderWidget(centerX - 225, y + 30, 200, 20,
-                Text.literal("Raid Counter Y: " + HudConfig.INSTANCE.rcY),
-                (double) HudConfig.INSTANCE.rcY / screenHeight) {
+                Text.literal("Raid Counter Y: " + HudConfig.INSTANCE.RaidCounterY),
+                (double) HudConfig.INSTANCE.RaidCounterY / screenHeight) {
             @Override
             protected void updateMessage() {
-                setMessage(Text.literal("Raid Counter Y: " + HudConfig.INSTANCE.rcY));
+                setMessage(Text.literal("Raid Counter Y: " + HudConfig.INSTANCE.RaidCounterY));
             }
 
             @Override
             protected void applyValue() {
-                HudConfig.INSTANCE.rcY = (int) (this.value * screenHeight);
+                HudConfig.INSTANCE.RaidCounterY = (int) (this.value * screenHeight);
                 updateMessage();
             }
         });
 
         addDrawableChild(new SliderWidget(centerX -225, y, 200, 20,
-                Text.literal("Raid Counter X: " + HudConfig.INSTANCE.rcX),
-                (double) HudConfig.INSTANCE.rcX / screenHeight) {
+                Text.literal("Raid Counter X: " + HudConfig.INSTANCE.RaidCounterX),
+                (double) HudConfig.INSTANCE.RaidCounterX / screenHeight) {
             @Override
             protected void updateMessage() {
-                setMessage(Text.literal("Raid Counter X: " + HudConfig.INSTANCE.rcX));
+                setMessage(Text.literal("Raid Counter X: " + HudConfig.INSTANCE.RaidCounterX));
             }
 
             @Override
             protected void applyValue() {
-                HudConfig.INSTANCE.rcX = (int) (this.value * screenWidth);
+                HudConfig.INSTANCE.RaidCounterX = (int) (this.value * screenWidth);
                 updateMessage();
             }
         });
 
         addDrawableChild(new SliderWidget(centerX + 25, y, 200, 20,
-                Text.literal("Raid Counter Scale: " + String.format("%.2f", HudConfig.INSTANCE.rcS)),
-                (HudConfig.INSTANCE.rcS -1f)/2f){
+                Text.literal("Raid Counter Scale: " + String.format("%.2f", HudConfig.INSTANCE.obtain(HudConfig.RAIDCOUNTER).scale)),
+                (HudConfig.INSTANCE.obtain(HudConfig.RAIDCOUNTER).scale -1f)/2f){
             @Override
             protected void updateMessage() {
-                setMessage(Text.literal("Raid Counter Scale: " + String.format("%.2f", HudConfig.INSTANCE.rcS)));
+                setMessage(Text.literal("Raid Counter Scale: " + String.format("%.2f", HudConfig.INSTANCE.obtain(HudConfig.RAIDCOUNTER).scale)));
             }
 
             @Override
             protected void applyValue() {
-                HudConfig.INSTANCE.rcS = (float) (1.0 + this.value * 2.0);
+                HudConfig.INSTANCE.obtain(HudConfig.RAIDCOUNTER).scale = (float) (1+this.value *2.0);
                 updateMessage();
             }
         });

@@ -26,7 +26,7 @@ public class RaidCounter {
         raidFlags.put("The Nameless Anomaly", false);
         raidFlags.put("Orphion's Nexus of Light", false); // NOL
         raidFlags.put("The Canyon Colossus", false);  // TCC
-        raidFlags.put("Nest of The Grootslang", false); // NoTG
+        raidFlags.put("Nest of The Grootslangs", false); // NoTG
     }
 
     private static final Map<String , Integer> raidCompletions = new HashMap<>();
@@ -52,13 +52,12 @@ public class RaidCounter {
             "The Nameless Anomaly", "TNA",
             "Orphion's Nexus of Light", "NoL",
             "The Canyon Colossus", "TCC",
-            "Nest of The Grootslang", "NoTG"
+            "Nest of The Grootslangs", "NoTG"
     );
     private static String lastCountedTitle = "";
 
     private long lastCompletionTime = 0;
     private static final long COOLDOWN_MS = 5000; // 5 seconds
-    private final long now = System.currentTimeMillis();
 
     public void checkRaidCompletion(MinecraftClient mc) {
         long now = System.currentTimeMillis();   // <-- move inside

@@ -1,5 +1,6 @@
 package net.fataled.wynnstacks.client.HudConfig;
 
+import net.fataled.wynnstacks.client.Utilities.Utilities;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -34,6 +35,9 @@ public class HudconfigScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("Raid Counter HUD"), button ->
                 MinecraftClient.getInstance().setScreen(new HudconfigScreenPage4(this))).position(centerX -50, y+ 30).size(95, 20).build());
 
+        addDrawableChild(ButtonWidget.builder(Text.literal("colors"), button ->
+                MinecraftClient.getInstance().setScreen(new HudconfigScreenPageColorSettings(this))).position(centerX - 50, y+ 60).size(95, 20).build());
+
         addDrawableChild(ButtonWidget.builder(Text.literal("Reset"), button -> {
             HudconfigManager.resetAndSave();
             MinecraftClient.getInstance().setScreen(null);
@@ -42,17 +46,18 @@ public class HudconfigScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("Done"), button -> {
             HudconfigManager.save();
             MinecraftClient.getInstance().setScreen(null);
-
-            String raw = inputbox.getText();
-            if(!raw.isEmpty()) {
-                try {
-                    int color = Integer.decode(raw.startsWith("#") ? "0x" + raw.substring(1) : raw);
-                    HudConfig.INSTANCE.color = color & 0xFFFFFF; // mask out any accidental alpha
-                } catch (NumberFormatException e) {
-                    player.sendMessage(Text.literal("Invalid color! Use RRGGBB or 0xRRGGBB."), false);
-                }
-            }
         }).position(centerX + 5, y + 140).size(95, 20).build());
+
+/*
+        String raw = inputbox.getText();
+        if(!raw.isEmpty()) {
+            try {
+                int color = Integer.decode(raw.startsWith("#") ? "0x" + raw.substring(1) : raw);
+                HudConfig.INSTANCE.setColorSetting("RaidCounterHUDColor", color);  // mask out any accidental alpha
+            } catch (NumberFormatException e) {
+                player.sendMessage(Text.literal("Invalid color! Use RRGGBB or 0xRRGGBB."), false);
+            }
+        }
 
         inputbox = new TextFieldWidget(
                 this.textRenderer,
@@ -62,11 +67,12 @@ public class HudconfigScreen extends Screen {
                 20,              // height
                 Text.literal("enter color")
         );
+        inputbox.setPlaceholder(Text.literal("Change HUD color"));
         inputbox.setMaxLength(8);
         inputbox.setEditableColor(0xFFFFFF);
         inputbox.setUneditableColor(0xAAAAAA);
         this.addDrawableChild(inputbox);
-
+    */
     }
 
 
@@ -79,6 +85,7 @@ public class HudconfigScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         this.renderBackground(context, mouseX, mouseY, delta);
         context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 20, 0xFFFFFF);
+        context.drawCenteredTextWithShadow(this.textRenderer, "Any issues message §nfataled§r on discord or in game", this.width / 2, (this.height/4)+180, 0xFFFFFF);
         super.render(context, mouseX, mouseY, delta);
     }
 }

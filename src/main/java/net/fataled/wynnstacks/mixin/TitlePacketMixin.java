@@ -16,11 +16,11 @@ public class TitlePacketMixin {
     @Inject(method = "onTitle", at = @At("HEAD"))
     private void onTitle(TitleS2CPacket packet, CallbackInfo ci) {
         Text titleText = packet.text();
+
         if (titleText != null) {
             String rawTitle = titleText.getString().trim();
             TitleHandler.fire(rawTitle);
             RaidModel.setLastTitle(rawTitle);
-            //MinecraftClient.getInstance().player.sendMessage(Text.literal(rawTitle), false);
         }
     }
 }

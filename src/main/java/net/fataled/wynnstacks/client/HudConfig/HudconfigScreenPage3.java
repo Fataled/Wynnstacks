@@ -23,31 +23,31 @@ public class HudconfigScreenPage3 extends Screen {
         int y = this.height / 4;
 
         addDrawableChild(new SliderWidget(centerX - 225, y + 30, 200, 20,
-                Text.literal("Satsujin Y: " + HudConfig.INSTANCE.Saty),
-                HudConfig.INSTANCE.Saty / screenHeight) {
+                Text.literal("Satsujin Y: " + HudConfig.INSTANCE.SatsujinY),
+                HudConfig.INSTANCE.SatsujinY / screenHeight) {
             @Override
             protected void updateMessage() {
-                setMessage(Text.literal("Satsujin Y: " + HudConfig.INSTANCE.Saty));
+                setMessage(Text.literal("Satsujin Y: " + HudConfig.INSTANCE.SatsujinY));
             }
 
             @Override
             protected void applyValue() {
-                HudConfig.INSTANCE.Saty = (int) (this.value * screenHeight);
+                HudConfig.INSTANCE.SatsujinY = (int) (this.value * screenHeight);
                 updateMessage();
             }
         });
 
         addDrawableChild(new SliderWidget(centerX - 225, y, 200, 20,
-                Text.literal("Satsujin X: " + HudConfig.INSTANCE.Satx),
-                HudConfig.INSTANCE.Saty / screenHeight) {
+                Text.literal("Satsujin X: " + HudConfig.INSTANCE.SatsujinX),
+                HudConfig.INSTANCE.SatsujinY / screenHeight) {
             @Override
             protected void updateMessage() {
-                setMessage(Text.literal("Satsujin X: " + HudConfig.INSTANCE.Satx));
+                setMessage(Text.literal("Satsujin X: " + HudConfig.INSTANCE.SatsujinX));
             }
 
             @Override
             protected void applyValue() {
-                HudConfig.INSTANCE.Satx = (int) (this.value * screenWidth);
+                HudConfig.INSTANCE.SatsujinX = (int) (this.value * screenWidth);
                 updateMessage();
             }
         });
@@ -82,16 +82,16 @@ public class HudconfigScreenPage3 extends Screen {
 
 
         addDrawableChild(new SliderWidget(centerX + 25 , y, 200, 20,
-                Text.literal("Scale: " + String.format("%.2f",HudConfig.INSTANCE.sScale) ),
-                (HudConfig.INSTANCE.sScale - 1f) / 2.0f) {
+                Text.literal("Scale: " + String.format("%.2f",HudConfig.INSTANCE.obtain(HudConfig.SATSUJIN).scale) ),
+                (HudConfig.INSTANCE.obtain(HudConfig.SATSUJIN).scale - 1f) / 2.0f) {
             @Override
             protected void updateMessage() {
-                setMessage(Text.literal("Scale: " + String.format("%.2f", HudConfig.INSTANCE.sScale)));
+                setMessage(Text.literal("Scale: " + String.format("%.2f", HudConfig.INSTANCE.obtain(HudConfig.SATSUJIN).scale)));
             }
 
             @Override
             protected void applyValue() {
-                HudConfig.INSTANCE.sScale = (float) (1 + this.value * 2.0); // 0.5 to 2.5
+                HudConfig.INSTANCE.obtain(HudConfig.SATSUJIN).scale = (float) (1+this.value *2.0);// 0.5 to 2.5
                 updateMessage();
             }
         });

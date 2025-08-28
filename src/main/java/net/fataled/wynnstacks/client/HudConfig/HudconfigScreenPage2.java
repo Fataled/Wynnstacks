@@ -60,16 +60,16 @@ public class HudconfigScreenPage2 extends Screen {
         });
 
         addDrawableChild(new SliderWidget(centerX + 25 , y, 200, 20,
-                Text.literal("Scale: " + String.format("%.2f",HudConfig.INSTANCE.scale) ),
-                (HudConfig.INSTANCE.scale - 1f) / 2.0f) {
+                Text.literal("Scale: " + String.format("%.2f",HudConfig.INSTANCE.obtain(HudConfig.DEBUFF).scale) ),
+                (HudConfig.INSTANCE.obtain(HudConfig.DEBUFF).scale - 1f) / 2.0f) {
             @Override
             protected void updateMessage() {
-                setMessage(Text.literal("Scale: " + String.format("%.2f", HudConfig.INSTANCE.scale)));
+                setMessage(Text.literal("Scale: " + String.format("%.2f", HudConfig.INSTANCE.obtain(HudConfig.DEBUFF).scale)));
             }
 
             @Override
             protected void applyValue() {
-                HudConfig.INSTANCE.scale = (float) (1 + this.value * 2.0); // 0.5 to 2.5
+                HudConfig.INSTANCE.obtain(HudConfig.DEBUFF).scale = (float) (1+this.value *2.0); // 0.5 to 2.5
                 updateMessage();
             }
         });
