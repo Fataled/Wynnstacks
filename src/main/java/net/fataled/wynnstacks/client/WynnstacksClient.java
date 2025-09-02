@@ -13,6 +13,7 @@ import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
 import net.fabricmc.fabric.api.resource.ResourcePackActivationType;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.ModContainer;
+import net.fataled.wynnstacks.client.commands.commands;
 import net.fataled.wynnstacks.client.raidRelated.RaidModel;
 import net.fataled.wynnstacks.client.rendering.HudRender;
 import net.minecraft.util.Identifier;
@@ -53,6 +54,7 @@ public class WynnstacksClient implements ClientModInitializer {
             soundListener = new MySoundListener();
             client.getSoundManager().registerListener(soundListener);
             LOGGER.info("[Init] SoundListener registered.");
+            commands.registerCommands();
         });
 
         // Tick countdown

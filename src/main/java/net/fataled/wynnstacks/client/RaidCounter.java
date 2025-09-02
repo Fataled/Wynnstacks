@@ -29,7 +29,7 @@ public class RaidCounter {
         raidFlags.put("Nest of The Grootslangs", false); // NoTG
     }
 
-    private static final Map<String , Integer> raidCompletions = new HashMap<>();
+    public static final Map<String , Integer> raidCompletions = new HashMap<>();
 
     static {
         raidCompletions.put("TNA",0);
@@ -39,7 +39,7 @@ public class RaidCounter {
 
     }
 
-    private static final Map<String , Integer> raidFails = new HashMap<>();
+    public static final Map<String , Integer> raidFails = new HashMap<>();
 
     static {
         raidFails.put("TNA",0);
