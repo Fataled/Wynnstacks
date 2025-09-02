@@ -52,7 +52,7 @@ public class WynnstacksClient implements ClientModInitializer {
         ClientLifecycleEvents.CLIENT_STARTED.register(client -> {
             soundListener = new MySoundListener();
             client.getSoundManager().registerListener(soundListener);
-            LOGGER.info("[Init] SoundListener registered.");
+            //LOGGER.info("[Init] SoundListener registered.");
         });
 
         // Tick countdown
