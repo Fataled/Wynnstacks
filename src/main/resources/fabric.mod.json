@@ -25,9 +25,9 @@
     "wynnstacks.mixins.json"
   ],
   "depends": {
-    "fabricloader": "${loader_version}",
+    "fabricloader": ">=${loader_version}",
     "fabric": "*",
-    "minecraft": "${minecraft_version}"
+    "minecraft": ">=${minecraft_version}"
   },
   "custom": {
     "modmenu": {
