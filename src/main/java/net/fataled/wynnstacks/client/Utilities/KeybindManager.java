@@ -28,13 +28,12 @@ public class KeybindManager {
     }
 
         private static KeyBinding registerKey (String name,int keyCode){
-            KeyBinding key = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+            return KeyBindingHelper.registerKeyBinding(new KeyBinding(
                     name,
                     InputUtil.Type.KEYSYM,
                     keyCode,
                     "category.hud"
             ));
-            return key;
         }
 
 }
