@@ -4,7 +4,6 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallba
 import net.fataled.wynnstacks.client.RaidCounter;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
-
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.literal;
 
 

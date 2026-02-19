@@ -27,7 +27,7 @@ public class MobLabelUtils {
             "mummyboard","virus","accipientis","matrojan","titanium","death metal","mechorrupter","robob","cybel","legendary","yahya",
             "grootslang","orphion","colossus","anomaly","parasite",
             "argaddon","witch","guardian","chained","alkevö","death","strato","qira","aledar","tasim","psychomancer",
-            "combat"
+            "dummy"
     );
 
     private static final Set<String> IGNORE_LABELS = Set.of(
@@ -83,6 +83,7 @@ public class MobLabelUtils {
         if (labels.isEmpty()) return List.of();
 
         // Closest label (kept in case you want it for debugging/heuristics)
+        /*
         TextDisplayEntity closest = null;
         double bestDistSq = Double.MAX_VALUE;
         for (TextDisplayEntity td : labels) {
@@ -90,6 +91,8 @@ public class MobLabelUtils {
             if (dsq < bestDistSq) { bestDistSq = dsq; closest = td; }
         }
         if (closest == null) return List.of();
+
+         */
 
         // Build text lines aligned above mob
         LinkedHashSet<String> lines = new LinkedHashSet<>(); // dedupe, preserve order

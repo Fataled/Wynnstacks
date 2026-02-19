@@ -54,9 +54,6 @@ public class HudConfig {
         return map;
     }
 
-
-
-
     @SerializedName("Text Profiles")
     public Map<String, Profile> profiles = defaultProfiles();
 

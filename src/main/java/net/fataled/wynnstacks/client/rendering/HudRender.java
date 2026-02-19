@@ -24,7 +24,7 @@ import static net.fataled.wynnstacks.client.Utilities.Utilities.stylePUAOnly;
 public class HudRender {
     private static final HudRender INSTANCE = new HudRender();
     private static final Identifier HudRenderLayer = Identifier.of("wynnstacks", "hud_render_layer");
-    private static final int HOLD_TICKS = 60;
+    private static final int HOLD_TICKS = 15;
     private UUID lastTargetId = null;
     private List<String> cachedLines = java.util.Collections.emptyList();
     private long holdUntilTick = 0;
@@ -58,6 +58,9 @@ public class HudRender {
                 String label = MobLabelUtils.removeUnrenderableChars(
                         MobLabelUtils.getEntityLabelName(target), false
                 ).trim();
+
+                if(!containsAnySubstring(label, MobLabelUtils.PRIORITY_LABELS)) return;
+
                 if (!label.isBlank()) {
                     statLines = new ArrayList<>(statLines);
                     statLines.addFirst(label);
@@ -139,7 +142,14 @@ public class HudRender {
             ms.pop();
         }
 
-
+        private boolean containsAnySubstring(String mainWord, List<String> keywords){
+            for (String keyword : keywords){
+                if(mainWord.toLowerCase().contains(keyword)){
+                    return true;
+                }
+            }
+            return false;
+        }
 
 
 
