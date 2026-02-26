@@ -3,17 +3,14 @@ package net.fataled.wynnstacks.client.Utilities;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Style;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextColor;
+import net.minecraft.text.*;
 import net.minecraft.util.Identifier;
 
 
 public class Utilities {
 
-    private static final Identifier PUA_FONT = Identifier.of("wynnstacks","stat_icons");
-
+    private static final Identifier PUA_FONT = Identifier.of("wynnstacks","default");
+    public static final StyleSpriteSource.Font Pua_Font = new StyleSpriteSource.Font(PUA_FONT);
     private static boolean isPUA(int cp) { return cp >= 0xE000 && cp <= 0xF8FF; }
 
     public static Text stylePUAOnly(String s) {
@@ -28,13 +25,15 @@ public class Utilities {
                 j += Character.charCount(cp);
             }
             MutableText seg = Text.literal(s.substring(i, j));
-            if (pua) seg = seg.styled(st -> st.withFont(PUA_FONT)); // <- force your sheet
+            if (pua) seg = seg.styled(st -> st.withFont(Pua_Font)); // <- force your sheet
             out.append(seg);
             i = j;
         }
         return out;
     }
 
+
+    //  {font=wynnstacks:stat_icons}
     private Utilities() {}
 
     // ---------- Public API ----------
@@ -63,13 +62,6 @@ public class Utilities {
             o.solidRgb = rgb;
             return o;
         }
-        public static Options gradient(int startRgb, int endRgb) {
-            Options o = new Options();
-            o.useGradient = true;
-            o.gradientStartRgb = startRgb;
-            o.gradientEndRgb = endRgb;
-            return o;
-        }
         public Options outline(int rgb, float thicknessPx) {
             this.outlineRgb = rgb;
             this.outlineThicknessPx = Math.max(0, thicknessPx);
@@ -81,14 +73,18 @@ public class Utilities {
     }
 
     /** Main entry: draws text at (x,y) with the given options. */
-    public static void draw(DrawContext ctx, String text, int x, int y, Options opt) {
-        if (text == null || text.isEmpty()) return;
-        final TextRenderer tr = MinecraftClient.getInstance().textRenderer;
+    public static void draw(DrawContext ctx, Text text, int x, int y, Options opt) {
+        String s = text.getString();
+        if (s.isEmpty()) return;
+        final TextRenderer tr;
+        tr = MinecraftClient.getInstance().textRenderer;
 
         // Build the fill Text (single object; kerning preserved)
-        final Text fillText = opt.useGradient
-                ? buildGradient(text, opt.gradientStartRgb, opt.gradientEndRgb)
-                : Text.literal(text).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(opt.solidRgb)));
+        Text fillText = opt.useGradient
+                ? buildGradient(s, opt.gradientStartRgb, opt.gradientEndRgb)
+                : Text.literal(s).setStyle(Style.EMPTY.withColor(TextColor.fromRgb(opt.solidRgb)));
+
+        fillText = Utilities.stylePUAOnly(fillText.getString());
 
         // Horizontal alignment offset (compute BEFORE scaling)
         int width = tr.getWidth(text);
@@ -100,9 +96,9 @@ public class Utilities {
 
         // Apply scale
         var ms = ctx.getMatrices();
-        ms.push();
-        ms.translate(xAligned, y, 0);
-        if (opt.scale != 1.0f) ms.scale(opt.scale, opt.scale, 1f);
+        ms.pushMatrix();
+        ms.translate(xAligned, y);
+        if (opt.scale != 1.0f) ms.scale(opt.scale, opt.scale);
 
         // Outline (flat color, drawn using the plain string)
         if (opt.outlineThicknessPx > 0) {
@@ -124,7 +120,7 @@ public class Utilities {
         // Main fill on top (gradient or solid)
         ctx.drawText(tr, fillText, 0, 0, 0xFFFFFF, opt.shadowOnMain);
 
-        ms.pop();
+        ms.popMatrix();
     }
 
     // ---------- Internals ----------
@@ -136,7 +132,7 @@ public class Utilities {
             int cp = text.codePointAt(off);
             float t = (len <= 1) ? 0f : (float) i / (float) (len - 1);
             int rgb = lerpRgb(startRgb, endRgb, t);
-            out = out.append(Text.literal(new String(Character.toChars(cp)))
+            out.append(Text.literal(new String(Character.toChars(cp)))
                     .setStyle(Style.EMPTY.withColor(TextColor.fromRgb(rgb))));
             off += Character.charCount(cp);
             i++;

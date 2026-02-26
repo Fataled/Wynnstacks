@@ -15,7 +15,6 @@ public class HudConfig {
     public static HudConfig INSTANCE = new HudConfig();
     @SerializedName("DebuffGradient") public boolean debuffGradient = false;
     @SerializedName("SatsujinGradient") public boolean satsujinGradient = false;
-    @SerializedName("RaidCounterGradient") public boolean raidCounterGradient = false;
 
     @SerializedName("x") public int x = 10;
     @SerializedName("y") public int y = 10;
@@ -33,10 +32,6 @@ public class HudConfig {
     @SerializedName("useEndSounds") public boolean useEndSounds = true;
     @SerializedName("Volume") public float Volume = 10f;
 
-    @SerializedName("rcX") public int RaidCounterX = 0;
-    @SerializedName("rcY") public int RaidCounterY = 0;
-    @SerializedName("lineGap") public int lineGap = 10;
-    @SerializedName("showRaidCounter") public boolean showRaidCounter = true;
 
     @SerializedName("Chosen Symbols") public Map<String, Boolean> chosenSymbols = defaultChosenSymbols();
     private static Map<String, Boolean> defaultChosenSymbols() {
@@ -61,8 +56,6 @@ public class HudConfig {
         // Fill
         public boolean useGradient = false;
         public int solidRgb = 0xFFFFFF;
-        public int gradientStartRgb = 0x00FFFF;
-        public int gradientEndRgb   = 0xFF00FF;
 
         // Outline
         public float outlineThicknessPx = 0f;
@@ -78,8 +71,6 @@ public class HudConfig {
             if (scale <= 0f) scale = 1.0f;
             align = align == null ? "LEFT" : align.toUpperCase(Locale.ROOT);
             solidRgb &= 0xFFFFFF;
-            gradientStartRgb &= 0xFFFFFF;
-            gradientEndRgb &= 0xFFFFFF;
             outlineRgb &= 0xFFFFFF;
             outlineThicknessPx = Math.max(0, outlineThicknessPx);
         }
@@ -91,8 +82,6 @@ public class HudConfig {
         Profile debuff = new Profile();
         debuff.useGradient = true;
         debuff.solidRgb = 0x0000F;
-        debuff.gradientStartRgb = 0x0000F;
-        debuff.gradientEndRgb   = 0x0000F;
         debuff.outlineThicknessPx = 0f;
         debuff.outlineRgb = 0x0000F;
         m.put(DEBUFF, debuff);
@@ -100,20 +89,9 @@ public class HudConfig {
         Profile satsu = new Profile();
         satsu.useGradient = true;
         satsu.solidRgb = 0x0000F;
-        satsu.gradientStartRgb = 0x0000F;
-        satsu.gradientEndRgb = 0x0000F;
         satsu.outlineThicknessPx = 0f;
         satsu.outlineRgb = 0x0000F;
         m.put(SATSUJIN, satsu);
-
-        Profile raid = new Profile();
-        raid.useGradient = true;
-        raid.solidRgb = 0x0000F;
-        raid.gradientStartRgb = 0x0000F;
-        raid.gradientEndRgb = 0x0000F;
-        raid.outlineThicknessPx = 0f;
-        raid.outlineRgb = 0x0000F;
-        m.put(RAIDCOUNTER, raid);
 
         return m;
     }

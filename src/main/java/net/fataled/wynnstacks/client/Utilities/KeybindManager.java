@@ -5,6 +5,7 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fataled.wynnstacks.client.HudConfig.HudconfigScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
 
@@ -28,11 +29,11 @@ public class KeybindManager {
     }
 
         private static KeyBinding registerKey (String name,int keyCode){
+
             return KeyBindingHelper.registerKeyBinding(new KeyBinding(
                     name,
-                    InputUtil.Type.KEYSYM,
                     keyCode,
-                    "category.hud"
+                    KeyBinding.Category.create(Identifier.of("wynnstacks.hud"))
             ));
         }
 

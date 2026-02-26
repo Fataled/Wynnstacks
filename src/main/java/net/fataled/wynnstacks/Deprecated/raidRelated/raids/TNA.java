@@ -1,6 +1,6 @@
-package net.fataled.wynnstacks.client.raidRelated.raids;
+package net.fataled.wynnstacks.Deprecated.raidRelated.raids;
 
-import net.fataled.wynnstacks.client.interfaces.RaidKind;
+import net.fataled.wynnstacks.Deprecated.interfaces.RaidKind;
 
 public class TNA implements RaidKind {
 

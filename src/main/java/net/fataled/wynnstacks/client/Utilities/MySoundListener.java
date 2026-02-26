@@ -10,15 +10,10 @@ import net.minecraft.client.sound.WeightedSoundSet;
 import net.minecraft.entity.Entity;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Identifier;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import java.util.List;
 import java.util.Locale;
 
 public class MySoundListener implements SoundInstanceListener {
-
-    private static final Logger LOGGER = LogManager.getLogger("Sound Listener");
 
     private static final Identifier SOUND_ONE = Identifier.of("minecraft:block.end_portal.spawn");
     private static final Identifier SOUND_TWO = Identifier.of("minecraft:block.enchantment_table.use");
@@ -85,9 +80,7 @@ public class MySoundListener implements SoundInstanceListener {
         {
             lastTriggerSoundTick = tick;
             triggerQueue.offer(tick);
-            LOGGER.info("[SND] pair OK: one={}, two={}, Δ={}",
-                    lastSoundOneTick, lastSoundTwoTick,
-                    Math.abs(lastSoundOneTick - lastSoundTwoTick));
+            LoggerUtils.info("[SND] pair OK: one={}, two={}, Δ={}" + lastSoundOneTick + lastSoundTwoTick + Math.abs(lastSoundOneTick - lastSoundTwoTick)); // this isnt python dumbo
         }
     }
 
@@ -125,7 +118,7 @@ public class MySoundListener implements SoundInstanceListener {
             List<String> stats = MobLabelUtils.getStatLines(target);
             if (shouldStart(label, stats)) {
                 startCountdown();
-                LOGGER.info("Starting countdown");
+                LoggerUtils.info("Starting countdown");
             }
         }
 
@@ -217,7 +210,7 @@ public class MySoundListener implements SoundInstanceListener {
     public void playEndSound() {
         if (hasSoundPlayed) return;
         mc.getSoundManager().play(
-                PositionedSoundInstance.master(SoundEvents.ITEM_TRIDENT_RETURN, 1.0f, HudConfig.INSTANCE.Volume)
+                PositionedSoundInstance.ui(SoundEvents.ITEM_TRIDENT_RETURN, 1.0f, HudConfig.INSTANCE.Volume)
         );
         hasSoundPlayed = true;
     }

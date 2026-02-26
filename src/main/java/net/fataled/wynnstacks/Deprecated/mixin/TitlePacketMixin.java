@@ -1,7 +1,7 @@
-package net.fataled.wynnstacks.mixin;
+package net.fataled.wynnstacks.Deprecated.mixin;
 
-import net.fataled.wynnstacks.client.raidRelated.RaidModel;
-import net.fataled.wynnstacks.event.TitleHandler;
+import net.fataled.wynnstacks.Deprecated.raidRelated.RaidModel;
+import net.fataled.wynnstacks.Deprecated.event.TitleHandler;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.network.packet.s2c.play.TitleS2CPacket;
 import net.minecraft.text.Text;

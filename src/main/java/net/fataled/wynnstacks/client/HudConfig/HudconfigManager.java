@@ -50,7 +50,6 @@ public class HudconfigManager {
     public static void reset() {
         HudConfig.INSTANCE.debuffGradient = false;
         HudConfig.INSTANCE.satsujinGradient = false;
-        HudConfig.INSTANCE.raidCounterGradient = false;
 
         HudConfig.INSTANCE.x = 0;
         HudConfig.INSTANCE.y = 10;
@@ -66,10 +65,6 @@ public class HudconfigManager {
         HudConfig.INSTANCE.SatsujinX = 0;
         HudConfig.INSTANCE.SatsujinY = 50;
         HudConfig.INSTANCE.showSatsujinHud = true;
-
-        HudConfig.INSTANCE.RaidCounterX = 0;
-        HudConfig.INSTANCE.RaidCounterY = 0;
-        HudConfig.INSTANCE.showRaidCounter = true;
 
         // Ensure map exists and has keys before replaceAll
         if (HudConfig.INSTANCE.chosenSymbols == null) {

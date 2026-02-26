@@ -32,7 +32,7 @@ public final class RaycastUtils {
         double bestScore = Double.MAX_VALUE;
 
         for (Entity e : candidates) {
-            Vec3d entityPos = e.getPos().add(0, e.getHeight() / 2.0, 0);
+            Vec3d entityPos = e.getEntityPos().add(0, e.getHeight() / 2.0, 0);
             Vec3d toEntity = entityPos.subtract(camPos).normalize();
             double angle = Math.acos(camDir.dotProduct(toEntity));
 

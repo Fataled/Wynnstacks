@@ -6,15 +6,12 @@ import net.minecraft.entity.decoration.DisplayEntity.TextDisplayEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Vec3d;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 import java.util.*;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public class MobLabelUtils {
-    private static final Logger LOGGER = LogManager.getLogger("MobLabelUtils");
 
     private static final double LABEL_RADIUS_XZ = 8.0;
     private static final double LABEL_RADIUS_Y = 30.0;
@@ -30,16 +27,15 @@ public class MobLabelUtils {
             "dummy"
     );
 
-    private static final Set<String> IGNORE_LABELS = Set.of(
-            "weapon","shop","armoring","identifier","'s","merchant","market","bank","wood","tailoring",
-            "npc","text display","armor stand","item display","skeleton","dernic","dps","loot","totem","damage","arrow","wolf",
-            "slime","arming","lvl","cooking","rock","blacksmith","emerald","experience orb","bug","lv.","wybel"
-    );
 
     // Code points for stat symbols; keep as boxed ints unless you want to pull in fastutil IntSets.
+    // Just remove Winded
+    // New fruma debudd hypoxia doesn't work for now
+    // Not new but add whipped for summoner
+    // Bleeding for aco not needed to be refreshed to frequently
     private static final Set<Integer> STAT_SYMBOLS = Set.of(
             0x271C, // ✜
-            0x2248, // ≈
+            //0x2248, // ≈
             0x2699, // ⚙
             0x2620, // ☠
             0xE03A, // Tricks
@@ -56,7 +52,6 @@ public class MobLabelUtils {
     private static final Pattern SHORT_NEG_NUM = Pattern.compile("^-\\d+(\\s*[\\p{So}\\p{Punct}]*)?$");
     private static final Pattern SHORT_POS_NUM = Pattern.compile("^\\+\\d+(\\s*[\\p{So}\\p{Punct}]*)?$"); // FIXED: escaped '+'
     private static final Pattern SECONDS_TAIL = Pattern.compile("\\b\\d+\\s*s\\b");
-
     private static final IgnPattern IGN_PATTERN = new IgnPattern(); // your existing impl
 
     /* =========================
@@ -64,11 +59,11 @@ public class MobLabelUtils {
        ========================= */
 
     public static List<String> getStatLines(Entity mob) {
-        final Vec3d mobPos = mob.getPos();
+        final Vec3d mobPos = mob.getEntityPos();
         final Box box = mob.getBoundingBox().expand(LABEL_RADIUS_XZ, LABEL_RADIUS_Y, LABEL_RADIUS_XZ);
 
         // Collect candidates once
-        List<TextDisplayEntity> labels = mob.getWorld().getEntitiesByClass(
+        List<TextDisplayEntity> labels = mob.getEntityWorld().getEntitiesByClass(
                 TextDisplayEntity.class, box,
                 td -> {
                     Text t = td.getText();
@@ -82,31 +77,21 @@ public class MobLabelUtils {
 
         if (labels.isEmpty()) return List.of();
 
-        // Closest label (kept in case you want it for debugging/heuristics)
-        /*
-        TextDisplayEntity closest = null;
-        double bestDistSq = Double.MAX_VALUE;
-        for (TextDisplayEntity td : labels) {
-            double dsq = td.squaredDistanceTo(mobPos);
-            if (dsq < bestDistSq) { bestDistSq = dsq; closest = td; }
-        }
-        if (closest == null) return List.of();
-
-         */
-
         // Build text lines aligned above mob
         LinkedHashSet<String> lines = new LinkedHashSet<>(); // dedupe, preserve order
         for (TextDisplayEntity td : labels) {
-            if (!isAboveMob(mobPos, td.getPos())) continue;
+            if (!isAboveMob(mobPos, td.getEntityPos())) continue;
 
             String raw = safeString(td.getText());
+            //LoggerUtils.info("[WynnStacks] Raw: " + raw);
             if (raw.isEmpty()) continue;
 
             // split and normalize each physical line
             String[] parts = LINE_SPLIT.split(raw);
             for (String part : parts) {
                 String stripped = stripColors(part);
-                String cleaned = removeUnrenderableChars(stripped, /*allowStatSymbols*/ true).trim();
+                //LoggerUtils.info("[Wynnstacks] stripped: " + stripped); // #TODO remove this once done testing / comment it out
+                String cleaned = removeUnrenderableChars(stripped,  true).trim();
                 if (!cleaned.isEmpty() && !isProbablyDamageLineFast(cleaned)) {
                     lines.add(cleaned);
                 }
@@ -135,7 +120,7 @@ public class MobLabelUtils {
     public static String getEntityLabelName(Entity mob) {
         final Box box = mob.getBoundingBox().expand(LABEL_RADIUS_XZ, LABEL_RADIUS_Y, LABEL_RADIUS_XZ);
 
-        List<TextDisplayEntity> labels = mob.getWorld().getEntitiesByClass(
+        List<TextDisplayEntity> labels = mob.getEntityWorld().getEntitiesByClass(
                 TextDisplayEntity.class, box,
                 td -> td.getText() != null && !safeString(td.getText()).isEmpty()
         );
@@ -162,7 +147,6 @@ public class MobLabelUtils {
 
             if (SECONDS_TAIL.matcher(lower).find()) continue;
             if (lower.startsWith("x2")) continue;
-            if (containsAny(lower, IGNORE_LABELS)) continue;
             if (IGN_PATTERN.getPattern().matcher(t).find()) continue;
             if (isProbablyDamageLineFast(t)) continue;
 
@@ -182,7 +166,7 @@ public class MobLabelUtils {
         String fb = disp != null ? disp.getString() : "";
         fb = removeUnrenderableChars(stripColors(fb), false).trim().toLowerCase(Locale.ROOT);
 
-        if (!fb.isEmpty() && !fb.startsWith("-") && !fb.startsWith("+") && !containsAny(fb, IGNORE_LABELS)) {
+        if (!fb.isEmpty() && !fb.startsWith("-") && !fb.startsWith("+")) {
             return fb;
         }
         return "";

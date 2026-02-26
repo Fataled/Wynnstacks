@@ -16,7 +16,7 @@ public final class ClientUtils {
 
         return mc.getNetworkHandler().getPlayerList().stream()
                 .map(PlayerListEntry::getProfile)
-                .map(GameProfile::getName)
+                .map(GameProfile::name)
                 .collect(Collectors.toUnmodifiableSet());
     }
 }

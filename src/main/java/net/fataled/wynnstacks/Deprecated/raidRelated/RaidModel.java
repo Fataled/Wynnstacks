@@ -1,8 +1,8 @@
-package net.fataled.wynnstacks.client.raidRelated;
+package net.fataled.wynnstacks.Deprecated.raidRelated;
 
-import net.fataled.wynnstacks.client.RaidCounter;
-import net.fataled.wynnstacks.client.interfaces.RaidKind;
-import net.fataled.wynnstacks.event.TitleHandler;
+import net.fataled.wynnstacks.Deprecated.RaidCounter;
+import net.fataled.wynnstacks.Deprecated.interfaces.RaidKind;
+import net.fataled.wynnstacks.Deprecated.event.TitleHandler;
 import net.minecraft.text.Text;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

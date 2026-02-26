@@ -1,3 +1,4 @@
+/*
 package net.fataled.wynnstacks.client.HudConfig;
 
 import net.minecraft.client.MinecraftClient;
@@ -105,4 +106,6 @@ public class HudconfigScreenPage4 extends Screen {
         super.render(context, mouseX, mouseY, delta);
     }
 }
+
+ */
 

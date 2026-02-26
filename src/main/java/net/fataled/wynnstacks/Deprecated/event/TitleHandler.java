@@ -1,4 +1,4 @@
-package net.fataled.wynnstacks.event;
+package net.fataled.wynnstacks.Deprecated.event;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;

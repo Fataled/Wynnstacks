@@ -1,20 +1,15 @@
 package net.fataled.wynnstacks.client.HudConfig;
 
-import net.fataled.wynnstacks.client.Utilities.Utilities;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.client.gui.widget.TextFieldWidget;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.text.Text;
 
 public class HudconfigScreen extends Screen {
 
     private final Screen parent;
 
-    private TextFieldWidget inputbox;
-    ClientPlayerEntity player = MinecraftClient.getInstance().player;
 
     public HudconfigScreen(Screen parent) {
         super(Text.literal("HUD Config"));
@@ -32,9 +27,6 @@ public class HudconfigScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("Satsujin HUD"), button ->
                 MinecraftClient.getInstance().setScreen(new HudconfigScreenPage3(this))).position(centerX, y).size(95, 20).build());
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Raid Counter HUD"), button ->
-                MinecraftClient.getInstance().setScreen(new HudconfigScreenPage4(this))).position(centerX -50, y+ 30).size(95, 20).build());
-
         addDrawableChild(ButtonWidget.builder(Text.literal("colors"), button ->
                 MinecraftClient.getInstance().setScreen(new HudconfigScreenPageColorSettings(this))).position(centerX - 50, y+ 60).size(95, 20).build());
 
@@ -48,31 +40,6 @@ public class HudconfigScreen extends Screen {
             MinecraftClient.getInstance().setScreen(null);
         }).position(centerX + 5, y + 140).size(95, 20).build());
 
-/*
-        String raw = inputbox.getText();
-        if(!raw.isEmpty()) {
-            try {
-                int color = Integer.decode(raw.startsWith("#") ? "0x" + raw.substring(1) : raw);
-                HudConfig.INSTANCE.setColorSetting("RaidCounterHUDColor", color);  // mask out any accidental alpha
-            } catch (NumberFormatException e) {
-                player.sendMessage(Text.literal("Invalid color! Use RRGGBB or 0xRRGGBB."), false);
-            }
-        }
-
-        inputbox = new TextFieldWidget(
-                this.textRenderer,
-                centerX - 100,    // x
-                y + 100,         // y
-                200,              // width
-                20,              // height
-                Text.literal("enter color")
-        );
-        inputbox.setPlaceholder(Text.literal("Change HUD color"));
-        inputbox.setMaxLength(8);
-        inputbox.setEditableColor(0xFFFFFF);
-        inputbox.setUneditableColor(0xAAAAAA);
-        this.addDrawableChild(inputbox);
-    */
     }
 
 
@@ -83,9 +50,25 @@ public class HudconfigScreen extends Screen {
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        this.renderBackground(context, mouseX, mouseY, delta);
-        context.drawCenteredTextWithShadow(this.textRenderer, this.title, this.width / 2, 20, 0xFFFFFF);
-        context.drawCenteredTextWithShadow(this.textRenderer, "Any issues message §nfataled§r on discord or in game", this.width / 2, (this.height/4)+180, 0xFFFFFF);
+        // draw a simple dark overlay instead of the blur background
+        context.fill(0, 0, this.width, this.height, 0xA0000000);
+
         super.render(context, mouseX, mouseY, delta);
+
+        context.drawCenteredTextWithShadow(
+                this.textRenderer,
+                this.title,
+                this.width / 2,
+                20,
+                0xFFFFFF
+        );
+
+        context.drawCenteredTextWithShadow(
+                this.textRenderer,
+                "Any issues message §nfataled§r on discord or in game",
+                this.width / 2,
+                (this.height / 4) + 180,
+                0xFFFFFF
+        );
     }
 }

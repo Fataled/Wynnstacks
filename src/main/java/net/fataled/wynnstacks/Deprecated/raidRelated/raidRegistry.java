@@ -1,10 +1,10 @@
-package net.fataled.wynnstacks.client.raidRelated;
+package net.fataled.wynnstacks.Deprecated.raidRelated;
 
-import net.fataled.wynnstacks.client.interfaces.RaidKind;
-import net.fataled.wynnstacks.client.raidRelated.raids.NoL;
-import net.fataled.wynnstacks.client.raidRelated.raids.NoTG;
-import net.fataled.wynnstacks.client.raidRelated.raids.TCC;
-import net.fataled.wynnstacks.client.raidRelated.raids.TNA;
+import net.fataled.wynnstacks.Deprecated.interfaces.RaidKind;
+import net.fataled.wynnstacks.Deprecated.raidRelated.raids.NoL;
+import net.fataled.wynnstacks.Deprecated.raidRelated.raids.NoTG;
+import net.fataled.wynnstacks.Deprecated.raidRelated.raids.TCC;
+import net.fataled.wynnstacks.Deprecated.raidRelated.raids.TNA;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
