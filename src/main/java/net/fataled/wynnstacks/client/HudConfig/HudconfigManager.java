@@ -48,8 +48,6 @@ public class HudconfigManager {
     }
 
     public static void reset() {
-        HudConfig.INSTANCE.debuffGradient = false;
-        HudConfig.INSTANCE.satsujinGradient = false;
 
         HudConfig.INSTANCE.x = 0;
         HudConfig.INSTANCE.y = 10;

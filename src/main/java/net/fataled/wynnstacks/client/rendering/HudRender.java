@@ -3,7 +3,6 @@ package net.fataled.wynnstacks.client.rendering;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fataled.wynnstacks.client.HudConfig.HudConfig;
-import net.fataled.wynnstacks.client.Utilities.HudTextDraw;
 import net.fataled.wynnstacks.client.Utilities.MobLabelUtils;
 import net.fataled.wynnstacks.client.Utilities.RaycastUtils;
 import net.fataled.wynnstacks.client.WynnstacksClient;
@@ -13,7 +12,7 @@ import net.minecraft.client.render.RenderTickCounter;
 import net.minecraft.entity.Entity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
-import org.joml.Matrix3x2fStack;
+
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +34,7 @@ public class HudRender {
     public void Render(DrawContext drawContext, RenderTickCounter tickDelta) {
         MinecraftClient mc = MinecraftClient.getInstance();
         if (mc.player == null || mc.world == null) return;
-
+        drawContext.drawTextWithShadow(mc.textRenderer, Text.literal("Visible TEXT"), 10, 10, 0xFFFFF);
         // 1) Raid counter block
         //renderRaidCounter(drawContext);
 
@@ -81,42 +80,75 @@ public class HudRender {
         }
 
         // 4) Draw HUD (live or cached), movable via HudConfig x/y and scale
+
         if (HudConfig.INSTANCE.showHud && !cachedLines.isEmpty()) {
 
-            Matrix3x2fStack ms = drawContext.getMatrices();
-
-            ms.pushMatrix();
-            ms.scale(HudConfig.INSTANCE.obtain(HudConfig.DEBUFF).scale, HudConfig.INSTANCE.obtain(HudConfig.DEBUFF).scale);
+            var ms = drawContext.getMatrices();
+            var debuff = HudConfig.INSTANCE.obtain(HudConfig.DEBUFF);
+            float scale = debuff.scale;
 
             int x = HudConfig.INSTANCE.x;
             int y = HudConfig.INSTANCE.y;
-            int lineheight = mc.textRenderer.fontHeight + 3;
 
-            for (String line : cachedLines) {
-                String cleaned = MobLabelUtils.removeUnrenderableChars(line, true).trim();
-                if (cleaned.isEmpty()) continue;
-                Text styled = stylePUAOnly(cleaned);
-                HudTextDraw.draw(drawContext, styled, x,y, HudConfig.INSTANCE, HudConfig.DEBUFF);
-                y += lineheight;
+            ms.pushMatrix();
+            try {
+                ms.scale(scale, scale);
+
+                int drawX = Math.round(x / scale);
+                int drawY = Math.round(y / scale);
+
+                int lineHeight = mc.textRenderer.fontHeight + 3;
+
+                for (String line : cachedLines) {
+                    String cleaned = MobLabelUtils.removeUnrenderableChars(line, true).trim();
+                    if (cleaned.isEmpty()) continue;
+
+                    Text styled = stylePUAOnly(cleaned);
+
+                    drawContext.drawTextWithShadow(
+                            mc.textRenderer,
+                            styled,
+                            drawX,
+                            drawY,
+                            0xFFFFFFFF
+                    );
+
+                    drawY += lineHeight;
+                }
+            } finally {
+                ms.popMatrix();
             }
-            ms.popMatrix();
         }
 
         // 5) Satsujin timer
         if (HudConfig.INSTANCE.showSatsujinHud) {
             if (WynnstacksClient.soundListener != null && WynnstacksClient.soundListener.getCountdownTicks() > 0) {
-                Matrix3x2fStack ms = drawContext.getMatrices();
-                ms.pushMatrix();
-                ms.scale(HudConfig.INSTANCE.obtain(HudConfig.SATSUJIN).scale, HudConfig.INSTANCE.obtain(HudConfig.SATSUJIN).scale);
+                var ms = drawContext.getMatrices();
+                var satsu = HudConfig.INSTANCE.obtain(HudConfig.SATSUJIN);
+                float scale = satsu.scale;
 
-                HudTextDraw.draw(drawContext, Text.of("Satsujin Timer: " + (WynnstacksClient.soundListener.getCountdownTicks() / 20) + "s"),
-                        HudConfig.INSTANCE.SatsujinX, HudConfig.INSTANCE.SatsujinY, HudConfig.INSTANCE, HudConfig.SATSUJIN
-                );
-                ms.popMatrix();
+                ms.pushMatrix();
+                try {
+                    ms.translate(HudConfig.INSTANCE.SatsujinX, HudConfig.INSTANCE.SatsujinY);
+                    ms.scale(scale, scale);
+
+
+
+
+                    drawContext.drawTextWithShadow(
+                            mc.textRenderer,
+                            Text.of("Satsujin Timer: " + (WynnstacksClient.soundListener.getCountdownTicks() / 20) + "s"),
+                            0,
+                            0,
+                            0xFFFFFFFF
+                    );
+                } finally {
+                    ms.popMatrix();
+                }
             }
         }
 
-        drawContext.drawCenteredTextWithShadow(MinecraftClient.getInstance().textRenderer, Text.literal("Visible"), 50, 50, 0xFFFFF);
+
     }
 
         private boolean containsAnySubstring(String mainWord, List<String> keywords){
@@ -127,9 +159,6 @@ public class HudRender {
             }
             return false;
         }
-
-
-
 
     }
 

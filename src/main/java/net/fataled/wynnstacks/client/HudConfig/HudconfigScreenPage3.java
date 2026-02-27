@@ -6,6 +6,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
 
 public class HudconfigScreenPage3 extends Screen {
     private final Screen parent;
@@ -22,32 +23,54 @@ public class HudconfigScreenPage3 extends Screen {
         int centerX = this.width / 2;
         int y = this.height / 4;
 
-        addDrawableChild(new SliderWidget(centerX - 225, y + 30, 200, 20,
-                Text.literal("Satsujin Y: " + HudConfig.INSTANCE.SatsujinY),
-                HudConfig.INSTANCE.SatsujinY / screenHeight) {
+        int ScreenWidth= this.width;
+        int bottomMarginX = 50;
+        int maxX = ScreenWidth - bottomMarginX;
+
+        // make sure current y is within range
+        HudConfig.INSTANCE.SatsujinX = MathHelper.clamp(HudConfig.INSTANCE.SatsujinX, 0, maxX);
+
+        // 0.0–1.0 slider value
+        double initialValueX = HudConfig.INSTANCE.SatsujinX / (double) maxX;
+
+        addDrawableChild(new SliderWidget(centerX - 225, y, 200, 20,
+                Text.literal("X: " + HudConfig.INSTANCE.SatsujinX),
+                initialValueX) {
+
             @Override
             protected void updateMessage() {
-                setMessage(Text.literal("Satsujin Y: " + HudConfig.INSTANCE.SatsujinY));
+                setMessage(Text.literal("X: " + HudConfig.INSTANCE.SatsujinX));
             }
 
             @Override
             protected void applyValue() {
-                HudConfig.INSTANCE.SatsujinY = (int) (this.value * screenHeight);
+                HudConfig.INSTANCE.SatsujinX = (int) (this.value * maxX);
                 updateMessage();
             }
         });
 
-        addDrawableChild(new SliderWidget(centerX - 225, y, 200, 20,
-                Text.literal("Satsujin X: " + HudConfig.INSTANCE.SatsujinX),
-                HudConfig.INSTANCE.SatsujinY / screenHeight) {
+        int screenHeight = this.height;
+        int bottomMarginY = 70;
+        int maxY = screenHeight - bottomMarginY;
+
+        // make sure current y is within range
+        HudConfig.INSTANCE.SatsujinY = MathHelper.clamp(HudConfig.INSTANCE.SatsujinY, 0, maxY);
+
+        // 0.0–1.0 slider value
+        double initialValueY = HudConfig.INSTANCE.SatsujinY / (double) maxY;
+
+        addDrawableChild(new SliderWidget(centerX - 225, y + 30, 200, 20,
+                Text.literal("Y: " + HudConfig.INSTANCE.SatsujinY),
+                initialValueY) {
+
             @Override
             protected void updateMessage() {
-                setMessage(Text.literal("Satsujin X: " + HudConfig.INSTANCE.SatsujinX));
+                setMessage(Text.literal("Y: " + HudConfig.INSTANCE.SatsujinY));
             }
 
             @Override
             protected void applyValue() {
-                HudConfig.INSTANCE.SatsujinX = (int) (this.value * screenWidth);
+                HudConfig.INSTANCE.SatsujinY = (int) (this.value * maxY);
                 updateMessage();
             }
         });

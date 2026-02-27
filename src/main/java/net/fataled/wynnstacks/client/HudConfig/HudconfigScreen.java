@@ -8,12 +8,10 @@ import net.minecraft.text.Text;
 
 public class HudconfigScreen extends Screen {
 
-    private final Screen parent;
 
 
     public HudconfigScreen(Screen parent) {
         super(Text.literal("HUD Config"));
-        this.parent = parent;
     }
 
     @Override
@@ -27,8 +25,8 @@ public class HudconfigScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("Satsujin HUD"), button ->
                 MinecraftClient.getInstance().setScreen(new HudconfigScreenPage3(this))).position(centerX, y).size(95, 20).build());
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("colors"), button ->
-                MinecraftClient.getInstance().setScreen(new HudconfigScreenPageColorSettings(this))).position(centerX - 50, y+ 60).size(95, 20).build());
+        //addDrawableChild(ButtonWidget.builder(Text.literal("colors"), button ->
+                //MinecraftClient.getInstance().setScreen(new HudconfigScreenPageColorSettings(this))).position(centerX - 50, y+ 60).size(95, 20).build());
 
         addDrawableChild(ButtonWidget.builder(Text.literal("Reset"), button -> {
             HudconfigManager.resetAndSave();
@@ -44,13 +42,9 @@ public class HudconfigScreen extends Screen {
 
 
     @Override
-    public boolean shouldPause() {
-        return false;
-    }
-
-    @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         // draw a simple dark overlay instead of the blur background
+
         context.fill(0, 0, this.width, this.height, 0xA0000000);
 
         super.render(context, mouseX, mouseY, delta);
@@ -59,16 +53,16 @@ public class HudconfigScreen extends Screen {
                 this.textRenderer,
                 this.title,
                 this.width / 2,
-                20,
-                0xFFFFFF
+                10,
+                0xFFFFFFFF
         );
 
         context.drawCenteredTextWithShadow(
                 this.textRenderer,
-                "Any issues message §nfataled§r on discord or in game",
+                Text.literal("Any issues message §nfataled§r on discord or in game"),
                 this.width / 2,
-                (this.height / 4) + 180,
-                0xFFFFFF
+                this.height / 2 - 40,
+                0xFFFF00FF
         );
     }
 }

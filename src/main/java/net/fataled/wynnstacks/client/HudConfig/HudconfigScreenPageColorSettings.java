@@ -20,10 +20,6 @@ public class HudconfigScreenPageColorSettings extends Screen {
     private static final int ROW_STEP = 40;
     private static final int GROUP_LABEL_Y = 70;
 
-    // Swatch layout (inside the text box on the right)
-    private static final int SWATCH_SIZE = 14;
-    private static final int SWATCH_PAD = 3; // padding from box edge
-
     private static String hex6(int rgb) { return String.format("#%06X", rgb & 0xFFFFFF); }
     private static String ftoa(float v) {
         return (v % 1f == 0f) ? Integer.toString((int)v) : Float.toString(v);
@@ -92,12 +88,6 @@ public class HudconfigScreenPageColorSettings extends Screen {
 
         context.drawCenteredTextWithShadow(this.textRenderer, "Debuff HUD Colors",    (this.width / 2) -  20, GROUP_LABEL_Y, 0xFFFFFF);
         context.drawCenteredTextWithShadow(this.textRenderer, "Satsujin HUD Colors",  (this.width / 2) - 220, GROUP_LABEL_Y, 0xFFFFFF);
-
-        drawColorSwatch(context, DebuffSolidColor);
-        drawColorSwatch(context, DebuffOutlineRGB);
-
-        drawColorSwatch(context, SatsujinSolidColor);
-        drawColorSwatch(context, SatsujinOutlineRGB);
     }
 
     /* =========================
@@ -124,7 +114,7 @@ public class HudconfigScreenPageColorSettings extends Screen {
     private void applyColor(TextFieldWidget field, Consumer<Integer> setter, String label) {
         String raw = safe(field);
         if (raw.isEmpty()) return;
-        Integer rgb = parseRgb24(raw);
+        Integer rgb = parseArgb(raw);
         if (rgb == null) {
             msg(label + ": Please use RRGGBB / #RRGGBB / 0xRRGGBB (or #RGB).");
         } else {
@@ -151,74 +141,43 @@ public class HudconfigScreenPageColorSettings extends Screen {
        Swatch drawing
        ========================= */
 
-    private void drawColorSwatch(DrawContext ctx, TextFieldWidget tf) {
-        if (tf == null || !tf.isVisible()) return;
-
-        // Parse every frame for live feedback (cheap)
-        Integer rgb = parseRgb24(safe(tf));
-
-        if (rgb == null || safe(tf).isEmpty()) {
-            final var d = HudConfig.INSTANCE.obtain(HudConfig.DEBUFF);
-            final var s = HudConfig.INSTANCE.obtain(HudConfig.SATSUJIN);
-
-            if (tf == DebuffSolidColor   ) rgb = d.solidRgb;
-            else if (tf == DebuffOutlineRGB   ) rgb = d.outlineRgb;
-
-            else if (tf == SatsujinSolidColor ) rgb = s.solidRgb;
-            else if (tf == SatsujinOutlineRGB ) rgb = s.outlineRgb;
-        }
-        // Where to draw: inside the field’s right edge
-        int bx = tf.getX();
-        int by = tf.getY();
-        int bw = tf.getWidth();
-        int bh = tf.getHeight();
-
-        int swX2 = bx + bw - SWATCH_PAD;                 // right inner edge
-        int swY1 = by + (bh - SWATCH_SIZE) / 2;          // vertically centered
-        int swX1 = swX2 - SWATCH_SIZE;
-        int swY2 = swY1 + SWATCH_SIZE;
-
-        // Background bezel (so it stands out over text)
-        // Outer border (dark)
-        ctx.fill(swX1 - 1, swY1 - 1, swX2 + 1, swY2 + 1, 0xFF000000);
-        // Inner border (light)
-        ctx.fill(swX1, swY1, swX2, swY2, 0xFFFFFFFF);
-
-        // Fill: parsed color or gray if invalid
-        int fill = (rgb != null) ? (0xFF000000 | rgb) : 0xFF7F7F7F;
-        ctx.fill(swX1 + 1, swY1 + 1, swX2 - 1, swY2 - 1, fill);
-    }
-
-    /* =========================
-       Parsing & helpers
-       ========================= */
 
     // Accepts: RRGGBB, #RRGGBB, 0xRRGGBB, AARRGGBB, #RGB
-    private static Integer parseRgb24(String raw) {
+    private static Integer parseArgb(String raw) {
         if (raw == null) return null;
+
         String s = raw.trim();
         if (s.isEmpty()) return null;
 
         if (s.startsWith("#")) s = s.substring(1);
         else if (s.startsWith("0x") || s.startsWith("0X")) s = s.substring(2);
 
-        // #RGB shorthand -> expand to RRGGBB
+        // #RGB shorthand → expand to RRGGBB
         if (s.length() == 3 && s.matches("(?i)^[0-9a-f]{3}$")) {
-            s = String.valueOf(s.charAt(0)) + s.charAt(0) +
-                    s.charAt(1) + s.charAt(1) +
-                    s.charAt(2) + s.charAt(2);
+            s = "" + s.charAt(0) + s.charAt(0)
+                    + s.charAt(1) + s.charAt(1)
+                    + s.charAt(2) + s.charAt(2);
         }
 
-        // Accept 6 (RRGGBB) or 8 (AARRGGBB)
+        // Must now be 6 or 8 hex digits
         if (!s.matches("(?i)^[0-9a-f]{6}([0-9a-f]{2})?$")) return null;
 
         try {
             long v = Long.parseUnsignedLong(s, 16);
-            return (int)(v & 0xFFFFFF); // ignore alpha if present
+
+            if (s.length() == 6) {
+                // RGB → add full alpha
+                return (int)(0xFF000000L | v);
+            } else {
+                // Already AARRGGBB
+                return (int)v;
+            }
+
         } catch (NumberFormatException e) {
             return null;
         }
     }
+
 
     private TextFieldWidget tf(int x, int y, String placeholder, String narration) {
         TextFieldWidget tf = new TextFieldWidget(this.textRenderer, x, y, FIELD_W, FIELD_H, Text.literal(narration));

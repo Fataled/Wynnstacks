@@ -6,11 +6,10 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.SliderWidget;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
 
 public class HudconfigScreenPage2 extends Screen {
     private final Screen parent;
-    float screenWidth = MinecraftClient.getInstance().getWindow().getScaledWidth();
-    float screenHeight = MinecraftClient.getInstance().getWindow().getScaledHeight();
 
     public HudconfigScreenPage2(Screen parent) {
         super(Text.literal("HUD Config - Debuff HUD"));
@@ -29,9 +28,20 @@ public class HudconfigScreenPage2 extends Screen {
 
         addDrawableChild(ButtonWidget.builder(Text.literal("⚙"), b -> MinecraftClient.getInstance().setScreen(new HudconfigScreenPageSymbols(this.parent))).position(0, 0).size(50, 50).build());
 
+        int ScreenWidth= this.width;
+        int bottomMarginX = 50;
+        int maxX = ScreenWidth - bottomMarginX;
+
+        // make sure current y is within range
+        HudConfig.INSTANCE.x = MathHelper.clamp(HudConfig.INSTANCE.x, 0, maxX);
+
+        // 0.0–1.0 slider value
+        double initialValueX = HudConfig.INSTANCE.x / (double) maxX;
+
         addDrawableChild(new SliderWidget(centerX - 225, y, 200, 20,
                 Text.literal("X: " + HudConfig.INSTANCE.x),
-                HudConfig.INSTANCE.x / screenWidth) {
+                initialValueX) {
+
             @Override
             protected void updateMessage() {
                 setMessage(Text.literal("X: " + HudConfig.INSTANCE.x));
@@ -39,14 +49,25 @@ public class HudconfigScreenPage2 extends Screen {
 
             @Override
             protected void applyValue() {
-                HudConfig.INSTANCE.x = (int) (this.value * screenWidth);
+                HudConfig.INSTANCE.x = (int) (this.value * maxX);
                 updateMessage();
             }
         });
 
+        int screenHeight = this.height;
+        int bottomMarginY = 70;
+        int maxY = screenHeight - bottomMarginY;
+
+        // make sure current y is within range
+        HudConfig.INSTANCE.y = MathHelper.clamp(HudConfig.INSTANCE.y, 0, maxY);
+
+        // 0.0–1.0 slider value
+        double initialValueY = HudConfig.INSTANCE.y / (double) maxY;
+
         addDrawableChild(new SliderWidget(centerX - 225, y + 30, 200, 20,
                 Text.literal("Y: " + HudConfig.INSTANCE.y),
-                HudConfig.INSTANCE.y / screenHeight) {
+                initialValueY) {
+
             @Override
             protected void updateMessage() {
                 setMessage(Text.literal("Y: " + HudConfig.INSTANCE.y));
@@ -54,7 +75,7 @@ public class HudconfigScreenPage2 extends Screen {
 
             @Override
             protected void applyValue() {
-                HudConfig.INSTANCE.y = (int) (this.value * screenHeight);
+                HudConfig.INSTANCE.y = (int) (this.value * maxY);
                 updateMessage();
             }
         });

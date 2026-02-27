@@ -3,6 +3,7 @@ package net.fataled.wynnstacks.client.Utilities;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fataled.wynnstacks.client.HudConfig.HudconfigScreen;
+import net.fataled.wynnstacks.client.debug.TestScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.util.Identifier;
@@ -14,10 +15,8 @@ public class KeybindManager {
 
     public static KeyBinding openHudConfig;
 
-
     public static void register() {
-        openHudConfig = registerKey("Key.hud.open_config", GLFW.GLFW_KEY_H);
-
+        openHudConfig = registerKey("Key.hud.open_config", GLFW.GLFW_KEY_H, "wynnstacks.hud");
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
 
             if (openHudConfig.wasPressed()) {
@@ -28,12 +27,12 @@ public class KeybindManager {
 
     }
 
-        private static KeyBinding registerKey (String name,int keyCode){
+        private static KeyBinding registerKey (String name,int keyCode, String id){
 
             return KeyBindingHelper.registerKeyBinding(new KeyBinding(
                     name,
                     keyCode,
-                    KeyBinding.Category.create(Identifier.of("wynnstacks.hud"))
+                    KeyBinding.Category.create(Identifier.of(id))
             ));
         }
 

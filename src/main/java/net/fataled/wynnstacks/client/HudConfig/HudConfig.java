@@ -54,7 +54,6 @@ public class HudConfig {
 
     public static final class Profile {
         // Fill
-        public boolean useGradient = false;
         public int solidRgb = 0xFFFFFF;
 
         // Outline
@@ -80,14 +79,12 @@ public class HudConfig {
         Map<String, Profile> m = new LinkedHashMap<>();
 
         Profile debuff = new Profile();
-        debuff.useGradient = true;
         debuff.solidRgb = 0x0000F;
         debuff.outlineThicknessPx = 0f;
         debuff.outlineRgb = 0x0000F;
         m.put(DEBUFF, debuff);
 
         Profile satsu = new Profile();
-        satsu.useGradient = true;
         satsu.solidRgb = 0x0000F;
         satsu.outlineThicknessPx = 0f;
         satsu.outlineRgb = 0x0000F;
