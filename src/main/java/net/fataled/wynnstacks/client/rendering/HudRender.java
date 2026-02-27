@@ -57,7 +57,7 @@ public class HudRender {
                         MobLabelUtils.getEntityLabelName(target), false
                 ).trim();
 
-                //if(!containsAnySubstring(label, MobLabelUtils.PRIORITY_LABELS)) return;
+                if(!containsAnySubstring(label, MobLabelUtils.PRIORITY_LABELS)) return;
 
                 if (!label.isBlank()) {
                     statLines = new ArrayList<>(statLines);
@@ -126,20 +126,21 @@ public class HudRender {
                 var ms = drawContext.getMatrices();
                 var satsu = HudConfig.INSTANCE.obtain(HudConfig.SATSUJIN);
                 float scale = satsu.scale;
-
+                int x = HudConfig.INSTANCE.SatsujinX;
+                int y = HudConfig.INSTANCE.SatsujinY;
                 ms.pushMatrix();
                 try {
-                    ms.translate(HudConfig.INSTANCE.SatsujinX, HudConfig.INSTANCE.SatsujinY);
                     ms.scale(scale, scale);
 
-
+                    int drawX = Math.round(x / scale);
+                    int drawY = Math.round(y / scale);
 
 
                     drawContext.drawTextWithShadow(
                             mc.textRenderer,
                             Text.of("Satsujin Timer: " + (WynnstacksClient.soundListener.getCountdownTicks() / 20) + "s"),
-                            0,
-                            0,
+                            drawX,
+                            drawY,
                             0xFFFFFFFF
                     );
                 } finally {
@@ -147,7 +148,6 @@ public class HudRender {
                 }
             }
         }
-
 
     }
 
