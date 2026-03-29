@@ -35,7 +35,7 @@ public class MobLabelUtils {
     // Bleeding for aco not needed to be refreshed to frequently
     private static final Set<Integer> STAT_SYMBOLS = Set.of(
             0x271C, // ✜
-            //0x2248, // ≈
+            0x2248, // ≈
             0x2699, // ⚙
             0x2620, // ☠
             0xE03A, // Tricks
