@@ -28,7 +28,6 @@ public final class RaycastUtils {
                 e.isAlive()
                         && (!ignorePlayers || !(e instanceof PlayerEntity))
                         && !isDamageTextDisplay(e)
-                        && !MobLabelUtils.getStatLines(e).isEmpty() // i.e. remove this line?
         );
 
         Entity best = null;
