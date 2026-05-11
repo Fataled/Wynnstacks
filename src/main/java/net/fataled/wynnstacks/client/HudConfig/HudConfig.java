@@ -20,9 +20,9 @@ public class HudConfig {
 
     @SerializedName("x") public int x = 10;
     @SerializedName("y") public int y = 10;
-    @SerializedName("Target Distance") public float maxTargetDistance = 72.0f;
+    @SerializedName("Target Distance") public float maxTargetDistance = 72.0f; // This is used raycastutils
     @SerializedName("debug") public boolean debug = false;
-    @SerializedName("range") public double range = 24.0;   // blocks
+    @SerializedName("range") public double range = 24.0;   // This is used for audio
     @SerializedName("coneAngleDeg") public int coneAngleDeg = 30;
     @SerializedName("ignorePlayers") public boolean ignorePlayers = true;
     @SerializedName("showHud") public boolean showHud = true;
