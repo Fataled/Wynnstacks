@@ -9,7 +9,6 @@ import net.minecraft.util.math.Vec3d;
 
 import java.util.*;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 public class MobLabelUtils {
 
@@ -21,12 +20,14 @@ public class MobLabelUtils {
 
     // Keep all lower-case; we lower candidate strings once.
     public static final List<String> PRIORITY_LABELS = List.of(
-            "mummyboard","virus","accipientis","matrojan","titanium","death metal","mechorrupter","robob","cybel","legendary","yahya",
-            "grootslang","orphion","colossus","anomaly","parasite",
-            "argaddon","witch","guardian","chained","alkevö","death","strato","qira","aledar","tasim","psychomancer",
+            "mummyboard", "virus", "accipientis", "matrojan", "titanium", "death metal", "mechorrupter", "robob", "cybel", "legendary", "yahya",
+            "grootslang", "orphion", "colossus", "anomaly", "parasite",
+            "argaddon", "witch", "guardian", "chained", "alkevö", "death", "strato", "qira", "aledar", "tasim", "psychomancer",
             "dummy"
     );
 
+    private volatile static int cachedSymbolVersion = -1;
+    private volatile static int[] cachedEnabledSorted = new int[0];
 
     // Code points for stat symbols; keep as boxed ints unless you want to pull in fastutil IntSets.
     // Just remove Winded
@@ -45,6 +46,10 @@ public class MobLabelUtils {
             0xE043, // Contamination
             0x2694  // ⚔
     );
+    private static final int[] STAT_SYMBOLS_SORTED = {
+            0x2248, 0x2620, 0x2694, 0x2699, 0x271C,
+            0xE03A, 0xE03C, 0xE03D, 0xE03F, 0xE043
+    };
 
     // Precompiled patterns (avoid recompiling every call)
     private static final Pattern COLOR_CODES = Pattern.compile("§[0-9a-fk-or]");
@@ -52,11 +57,18 @@ public class MobLabelUtils {
     private static final Pattern SHORT_NEG_NUM = Pattern.compile("^-\\d+(\\s*[\\p{So}\\p{Punct}]*)?$");
     private static final Pattern SHORT_POS_NUM = Pattern.compile("^\\+\\d+(\\s*[\\p{So}\\p{Punct}]*)?$"); // FIXED: escaped '+'
     private static final Pattern SECONDS_TAIL = Pattern.compile("\\b\\d+\\s*s\\b");
-    private static final IgnPattern IGN_PATTERN = new IgnPattern(); // your existing impl
+    private static final Pattern PRIORITY_REGEX = Pattern.compile(
+            String.join("|", PRIORITY_LABELS),
+            Pattern.CASE_INSENSITIVE
+    );
 
     /* =========================
        Public API
        ========================= */
+
+    public static boolean isPriority(String label){
+        return PRIORITY_REGEX.matcher(label).find();
+    }
 
     public static List<String> getStatLines(Entity mob) {
         final Vec3d mobPos = mob.getEntityPos();
@@ -91,7 +103,7 @@ public class MobLabelUtils {
             for (String part : parts) {
                 String stripped = stripColors(part);
                 //LoggerUtils.info("[Wynnstacks] stripped: " + stripped); // #TODO remove this once done testing / comment it out
-                String cleaned = removeUnrenderableChars(stripped,  true).trim();
+                String cleaned = removeUnrenderableChars(stripped, true).trim();
                 if (!cleaned.isEmpty() && !isProbablyDamageLineFast(cleaned)) {
                     lines.add(cleaned);
                 }
@@ -100,17 +112,16 @@ public class MobLabelUtils {
         if (lines.isEmpty()) return List.of();
 
         // Config-enabled symbols once
-        final Set<Integer> enabled = enabledSymbols();
-        final Set<Integer> allSyms = STAT_SYMBOLS;
+        final int[] enabled = enabledSymbols();
 
         // Filter/stat-chunk stripping in one pass
         ArrayList<String> out = new ArrayList<>(lines.size());
         for (String line : lines) {
-            String pruned = removeDisabledStatChunks(line, enabled, allSyms);
+            String pruned = removeDisabledStatChunks(line, enabled);
             if (pruned.isEmpty()) continue;
 
             // keep only lines that still have at least one stat symbol + a digit
-            boolean hasSym = containsAnyCodepoint(pruned, allSyms);
+            boolean hasSym = containsAnyCodepoint(pruned);
             boolean hasDigit = containsDigit(pruned);
             if (hasSym && hasDigit) out.add(pruned);
         }
@@ -147,7 +158,7 @@ public class MobLabelUtils {
 
             if (SECONDS_TAIL.matcher(lower).find()) continue;
             if (lower.startsWith("x2")) continue;
-            if (IGN_PATTERN.getPattern().matcher(t).find()) continue;
+            if (IgnPattern.INSTANCE.getPattern().matcher(t).find()) continue;
             if (isProbablyDamageLineFast(t)) continue;
 
             candidates.add(t);
@@ -156,7 +167,7 @@ public class MobLabelUtils {
         // Priority match
         for (String c : candidates) {
             String lower = c.toLowerCase(Locale.ROOT);
-            if (containsAny(lower, PRIORITY_LABELS)) return c;
+            if (isPriority(lower)) return c;
         }
 
         if (!candidates.isEmpty()) return candidates.getFirst();
@@ -191,15 +202,47 @@ public class MobLabelUtils {
 
     public static String removeUnrenderableChars(String input, boolean allowStatSymbols) {
         if (input == null || input.isEmpty()) return "";
-        final Set<Integer> allowed = allowStatSymbols ? STAT_SYMBOLS : Collections.emptySet();
 
-        StringBuilder sb = new StringBuilder(input.length());
-        input.codePoints().forEach(cp -> {
-            if ((cp >= 32 && cp <= 126) || Character.isWhitespace(cp) || allowed.contains(cp)) {
-                sb.appendCodePoint(cp);
+        int len = input.length();
+
+        int firstBad = -1;
+        int i = 0;
+        while(i < len) {
+            int codePoint = input.codePointAt(i);
+            if (!isKeepable(codePoint, allowStatSymbols)) {
+                firstBad = i;
+                break;
             }
-        });
+            i += Character.charCount(codePoint);
+        }
+            if (firstBad < 0) return input;
+
+
+        StringBuilder sb = new StringBuilder(len);
+
+        sb.append(input, 0, firstBad);
+
+        i = firstBad;
+        while(i < len){
+            int codePoint = input.codePointAt(i);
+            int width = Character.charCount(codePoint);
+
+            boolean keep = isKeepable(codePoint, allowStatSymbols);
+
+            if (keep) sb.appendCodePoint(codePoint);
+
+            i += width;
+        }
         return sb.toString();
+    }
+
+    private static boolean isKeepable(int codePoint, boolean allowStatSymbols){
+        return (codePoint >= 32 && codePoint <= 126)
+                || Character.isWhitespace(codePoint) || (allowStatSymbols && isStatSymbol(codePoint));
+    }
+
+    private static boolean isStatSymbol(int codePoint) {
+        return Arrays.binarySearch(STAT_SYMBOLS_SORTED, codePoint) >= 0;
     }
 
     // Faster than running multiple regexes—cheap short-circuits first
@@ -223,7 +266,7 @@ public class MobLabelUtils {
         // Parentheses fix for operator precedence:
         // trigger if starts with +/-/[ AND has a stat symbol somewhere
         return (line.startsWith("+") || line.startsWith("[") || line.startsWith("-"))
-                && containsAnyCodepoint(line, STAT_SYMBOLS);
+                && containsAnyCodepoint(line);
     }
 
     private static String safeString(Text t) {
@@ -231,15 +274,8 @@ public class MobLabelUtils {
         return (s == null) ? "" : s;
     }
 
-    private static boolean containsAny(String haystackLower, Collection<String> needlesLower) {
-        for (String n : needlesLower) {
-            if (haystackLower.contains(n)) return true;
-        }
-        return false;
-    }
-
-    private static boolean containsAnyCodepoint(String s, Set<Integer> cps) {
-        return s.codePoints().anyMatch(cps::contains);
+    private static boolean containsAnyCodepoint(String s) {
+        return s.codePoints().anyMatch(MobLabelUtils::isStatSymbol);
     }
 
     private static boolean containsDigit(String s) {
@@ -251,34 +287,47 @@ public class MobLabelUtils {
         return Integer.parseInt(hex, 16);
     }
 
-    private static Set<Integer> enabledSymbols() {
-        // Compute once per call; if HudConfig changes rarely, consider caching with an epoch/version.
-        return HudConfig.INSTANCE.chosenSymbols.entrySet().stream()
-                .filter(Map.Entry::getValue)
-                .map(e -> parseHex(e.getKey()))
-                .collect(Collectors.toSet());
+    private static int[] enabledSymbols() {
+        int v = HudConfig.symbolVersion();
+        if (v != cachedSymbolVersion) {
+            cachedEnabledSorted = HudConfig.INSTANCE.chosenSymbols.entrySet().stream()
+                    .filter(Map.Entry::getValue)
+                    .mapToInt(e -> parseHex(e.getKey()))
+                    .sorted()
+                    .toArray();
+            cachedSymbolVersion = v;
+        }
+        return cachedEnabledSorted;
     }
 
-    private static String removeDisabledStatChunks(String line, Set<Integer> enabled, Set<Integer> allSymbols) {
+    private static String removeDisabledStatChunks(String line, int[] enabled) {
         if (line == null || line.isEmpty()) return "";
-        String[] tokens = line.split("\\s+");
-        StringBuilder out = new StringBuilder(line.length());
+        int len = line.length();
+        StringBuilder out = new StringBuilder(len);
         boolean skipping = false;
+        boolean firstOut = true;
+        int i = 0;
 
-        for (String tok : tokens) {
-            if (tok.isEmpty()) continue;
+        while (i < len) {
+            while (i < len && Character.isWhitespace(line.charAt(i))) i++;
+            if (i >= len) break;
 
-            int firstCp = tok.codePointAt(0);
-            boolean startsWithSymbol = allSymbols.contains(firstCp);
+            int tokenStart = i;
+            int firstCodePoint = line.codePointAt(i);
 
+            while (i < len && !Character.isWhitespace(line.charAt(i))) i++;
+
+            boolean startsWithSymbol = Arrays.binarySearch(STAT_SYMBOLS_SORTED, firstCodePoint) >= 0;
             if (startsWithSymbol) {
-                skipping = !enabled.contains(firstCp);
+                skipping = Arrays.binarySearch(enabled, firstCodePoint) < 0;
             }
             if (!skipping) {
-                if (!out.isEmpty()) out.append(' ');
-                out.append(tok);
+                if (!firstOut) out.append(' ');
+                out.append(line, tokenStart, i);
+                firstOut = false;
             }
         }
-        return out.toString().trim();
+
+        return out.toString();
     }
 }

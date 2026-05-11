@@ -31,17 +31,17 @@ public class MySoundListener implements SoundInstanceListener {
 
     private final MinecraftClient mc = MinecraftClient.getInstance();
 
-    private long lastSoundOneTick = -1000;
-    private long lastSoundTwoTick = -1000;
-    private long lastTriggerSoundTick = -1000;
+    private volatile long lastSoundOneTick = -1000;
+    private volatile long lastSoundTwoTick = -1000;
+    private volatile long lastTriggerSoundTick = -1000;
 
     private long lastProcessedTick = -1;
-    private long lastEvalTick = -1000;
+    private volatile long lastEvalTick = -1000;
 
     // Countdown state
     private int countdownTicks = 0;
     private boolean isCountdownActive = false;
-    public boolean hasSoundPlayed = false;
+    private boolean hasSoundPlayed = false;
 
     // Tiny cache to avoid recomputing for the exact same looked-at entity every frame
     private int cachedEntityId = -1;
@@ -80,7 +80,8 @@ public class MySoundListener implements SoundInstanceListener {
         {
             lastTriggerSoundTick = tick;
             triggerQueue.offer(tick);
-            LoggerUtils.info("[SND] pair OK: one={}, two={}, Δ={}" + lastSoundOneTick + lastSoundTwoTick + Math.abs(lastSoundOneTick - lastSoundTwoTick)); // this isnt python dumbo
+            String logging = String.format("[SND] pair OK: one={%d}, two={%d}, Δ={%d}",lastSoundOneTick, lastSoundTwoTick, Math.abs(lastSoundOneTick - lastSoundTwoTick));
+            LoggerUtils.info(logging);
         }
     }
 
@@ -108,11 +109,10 @@ public class MySoundListener implements SoundInstanceListener {
         lastEvalTick = tick;
 
         // Snapshot config once (avoid multiple volatile reads)
-        final float range = (float) HudConfig.INSTANCE.range;
         final float cone = HudConfig.INSTANCE.coneAngleDeg;
         final boolean ignorePlayers = HudConfig.INSTANCE.ignorePlayers;
 
-        Entity target = getTargetWithCache(range, cone, ignorePlayers, tick);
+        Entity target = getTargetWithCache(cone, ignorePlayers, tick);
         if (target != null) {
             String label = MobLabelUtils.getEntityLabelName(target);
             List<String> stats = MobLabelUtils.getStatLines(target);
@@ -137,9 +137,9 @@ public class MySoundListener implements SoundInstanceListener {
         }
     }
 
-    private Entity getTargetWithCache(float range, float cone, boolean ignorePlayers, long tick) {
+    private Entity getTargetWithCache(float cone, boolean ignorePlayers, long tick) {
         // Try a fresh raycast
-        Entity e = RaycastUtils.getLookedAtEntity(mc, range, cone, ignorePlayers);
+        Entity e = RaycastUtils.getLookedAtEntity(mc, cone, ignorePlayers);
         if (e != null) {
             cachedEntityId = e.getId();
             cachedEntityTick = tick;
@@ -163,7 +163,7 @@ public class MySoundListener implements SoundInstanceListener {
 
         // priority name check (lower once)
         String cleaned = label.toLowerCase(Locale.ROOT);
-        boolean hasPriority = MobLabelUtils.PRIORITY_LABELS.stream().anyMatch(cleaned::contains);
+        boolean hasPriority = MobLabelUtils.isPriority(cleaned);
         if (!hasPriority) return false;
 
         // cheap heart 4–9 check without regex
@@ -199,7 +199,7 @@ public class MySoundListener implements SoundInstanceListener {
     }
 
     private void startCountdown() {
-        countdownTicks = HudConfig.INSTANCE.AspectLvl2 ? 10 * 20 : 15 * 20;
+        countdownTicks = HudConfig.INSTANCE.aspectLvl2 ? 10 * 20 : 15 * 20;
         isCountdownActive = true;
         hasSoundPlayed = false;
         // LOGGER.info("[SoundListener] Countdown started: {} ticks", countdownTicks);
@@ -210,7 +210,7 @@ public class MySoundListener implements SoundInstanceListener {
     public void playEndSound() {
         if (hasSoundPlayed) return;
         mc.getSoundManager().play(
-                PositionedSoundInstance.ui(SoundEvents.ITEM_TRIDENT_RETURN, 1.0f, HudConfig.INSTANCE.Volume)
+                PositionedSoundInstance.ui(SoundEvents.ITEM_TRIDENT_RETURN, 1.0f, HudConfig.INSTANCE.volume)
         );
         hasSoundPlayed = true;
     }

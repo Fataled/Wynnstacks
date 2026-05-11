@@ -38,8 +38,6 @@ public class HudconfigScreenPageColorSettings extends Screen {
     @Override
     protected void init() {
         // ensure disk -> memory sync (if not already done at startup)
-        HudconfigManager.load(); // <-- add this if your mod doesn't autoload earlier
-
         final int centerX = this.width / 2;
         final int colDebuffX = centerX - 100;
         final int colSatsujinX = centerX - 300;

@@ -139,5 +139,10 @@ public class HudconfigScreenPage2 extends Screen {
         );
 
     }
+    @Override
+    public void close(){
+        HudconfigManager.save();
+        super.close();
+    }
 }
 

@@ -28,23 +28,23 @@ public class HudconfigScreenPage3 extends Screen {
         int maxX = ScreenWidth - bottomMarginX;
 
         // make sure current y is within range
-        HudConfig.INSTANCE.SatsujinX = MathHelper.clamp(HudConfig.INSTANCE.SatsujinX, 0, maxX);
+        HudConfig.INSTANCE.satsujinX = MathHelper.clamp(HudConfig.INSTANCE.satsujinX, 0, maxX);
 
         // 0.0–1.0 slider value
-        double initialValueX = HudConfig.INSTANCE.SatsujinX / (double) maxX;
+        double initialValueX = HudConfig.INSTANCE.satsujinX / (double) maxX;
 
         addDrawableChild(new SliderWidget(centerX - 225, y, 200, 20,
-                Text.literal("X: " + HudConfig.INSTANCE.SatsujinX),
+                Text.literal("X: " + HudConfig.INSTANCE.satsujinX),
                 initialValueX) {
 
             @Override
             protected void updateMessage() {
-                setMessage(Text.literal("X: " + HudConfig.INSTANCE.SatsujinX));
+                setMessage(Text.literal("X: " + HudConfig.INSTANCE.satsujinX));
             }
 
             @Override
             protected void applyValue() {
-                HudConfig.INSTANCE.SatsujinX = (int) (this.value * maxX);
+                HudConfig.INSTANCE.satsujinX = (int) (this.value * maxX);
                 updateMessage();
             }
         });
@@ -54,30 +54,30 @@ public class HudconfigScreenPage3 extends Screen {
         int maxY = screenHeight - bottomMarginY;
 
         // make sure current y is within range
-        HudConfig.INSTANCE.SatsujinY = MathHelper.clamp(HudConfig.INSTANCE.SatsujinY, 0, maxY);
+        HudConfig.INSTANCE.satsujinY = MathHelper.clamp(HudConfig.INSTANCE.satsujinY, 0, maxY);
 
         // 0.0–1.0 slider value
-        double initialValueY = HudConfig.INSTANCE.SatsujinY / (double) maxY;
+        double initialValueY = HudConfig.INSTANCE.satsujinY / (double) maxY;
 
         addDrawableChild(new SliderWidget(centerX - 225, y + 30, 200, 20,
-                Text.literal("Y: " + HudConfig.INSTANCE.SatsujinY),
+                Text.literal("Y: " + HudConfig.INSTANCE.satsujinY),
                 initialValueY) {
 
             @Override
             protected void updateMessage() {
-                setMessage(Text.literal("Y: " + HudConfig.INSTANCE.SatsujinY));
+                setMessage(Text.literal("Y: " + HudConfig.INSTANCE.satsujinY));
             }
 
             @Override
             protected void applyValue() {
-                HudConfig.INSTANCE.SatsujinY = (int) (this.value * maxY);
+                HudConfig.INSTANCE.satsujinY = (int) (this.value * maxY);
                 updateMessage();
             }
         });
 
-        addDrawableChild(ButtonWidget.builder(Text.literal("Aspect LVL 2: " + HudConfig.INSTANCE.AspectLvl2), button -> {
-            HudConfig.INSTANCE.AspectLvl2 = !HudConfig.INSTANCE.AspectLvl2;
-            button.setMessage(Text.literal("Aspect LVL 2: " + HudConfig.INSTANCE.AspectLvl2));
+        addDrawableChild(ButtonWidget.builder(Text.literal("Aspect LVL 2: " + HudConfig.INSTANCE.aspectLvl2), button -> {
+            HudConfig.INSTANCE.aspectLvl2 = !HudConfig.INSTANCE.aspectLvl2;
+            button.setMessage(Text.literal("Aspect LVL 2: " + HudConfig.INSTANCE.aspectLvl2));
         }).position(centerX - 100, y + 90).size(95, 20).build());
 
         addDrawableChild(ButtonWidget.builder(Text.literal("Show Hud: " + HudConfig.INSTANCE.showSatsujinHud), button -> {
@@ -86,16 +86,16 @@ public class HudconfigScreenPage3 extends Screen {
         }).position(centerX, y + 90).size(95, 20).build());
 
         addDrawableChild(new SliderWidget(centerX + 25, y + 30, 200, 20,
-                Text.literal("Volume: " + String.format("%.0f",HudConfig.INSTANCE.Volume)+ "%"),
-                HudConfig.INSTANCE.Volume / 100) {
+                Text.literal("Volume: " + String.format("%.0f",HudConfig.INSTANCE.volume)+ "%"),
+                HudConfig.INSTANCE.volume / 100) {
             @Override
             protected void updateMessage() {
-                setMessage(Text.literal("Volume: " + String.format("%.0f",HudConfig.INSTANCE.Volume)+ "%"));
+                setMessage(Text.literal("Volume: " + String.format("%.0f",HudConfig.INSTANCE.volume)+ "%"));
             }
 
             @Override
             protected void applyValue() {
-                HudConfig.INSTANCE.Volume = (float) (this.value * 100f);
+                HudConfig.INSTANCE.volume = (float) (this.value * 100f);
                 updateMessage();
             }
         });
@@ -141,6 +141,12 @@ public class HudconfigScreenPage3 extends Screen {
                 0xFFFFFF
         );
 
+    }
+
+    @Override
+    public void close(){
+        HudconfigManager.save();
+        super.close();
     }
 }
 

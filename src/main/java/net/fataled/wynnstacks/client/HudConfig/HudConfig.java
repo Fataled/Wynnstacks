@@ -5,20 +5,22 @@ import com.google.gson.annotations.SerializedName;
 import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class HudConfig {
     public static final String DEBUFF      = "debuff";
     public static final String SATSUJIN    = "satsujin";
-    public static final String RAIDCOUNTER = "raidCounter";
 
-    public static HudConfig INSTANCE = new HudConfig();
-    @SerializedName("DebuffGradient") public boolean debuffGradient = false;
-    @SerializedName("SatsujinGradient") public boolean satsujinGradient = false;
+    private static final AtomicInteger SYMBOL_VERSION = new AtomicInteger(0);
+    public static void bumpSymbolVersion(){SYMBOL_VERSION.incrementAndGet();}
+    public static int symbolVersion(){return SYMBOL_VERSION.get();}
+
+    public static final HudConfig INSTANCE = new HudConfig();
 
     @SerializedName("x") public int x = 10;
     @SerializedName("y") public int y = 10;
-    @SerializedName("Target Distance") public float maxTargetDistance = 72.0f;
+    @SerializedName("Target Distance") public float maxTargetDistance = 24.0f;
     @SerializedName("debug") public boolean debug = false;
     @SerializedName("range") public double range = 24.0;   // blocks
     @SerializedName("coneAngleDeg") public int coneAngleDeg = 30;
@@ -26,16 +28,17 @@ public class HudConfig {
     @SerializedName("showHud") public boolean showHud = true;
 
     @SerializedName("showSatsujinHud") public boolean showSatsujinHud = true;
-    @SerializedName("AspectLvl2") public boolean AspectLvl2 = false;
-    @SerializedName("Satx") public int SatsujinX = 0;
-    @SerializedName("Saty") public int SatsujinY = 40;
+    @SerializedName("AspectLvl2") public boolean aspectLvl2 = false;
+    @SerializedName("Satx") public int satsujinX = 0;
+    @SerializedName("Saty") public int satsujinY = 40;
     @SerializedName("useEndSounds") public boolean useEndSounds = true;
-    @SerializedName("Volume") public float Volume = 10f;
+    @SerializedName("Volume") public float volume = 10f;
 
 
     @SerializedName("Chosen Symbols") public Map<String, Boolean> chosenSymbols = defaultChosenSymbols();
-    private static Map<String, Boolean> defaultChosenSymbols() {
+    public static Map<String, Boolean> defaultChosenSymbols() {
         Map<String, Boolean> map = new LinkedHashMap<>();
+
         map.put("0x271C", true);
         map.put("0x2248", true);
         map.put("0x2699", true);
@@ -59,7 +62,6 @@ public class HudConfig {
         // Outline
         public float outlineThicknessPx = 0f;
         public int outlineRgb = 0x101018;
-        public boolean shadowOnMain = false;
 
         // Layout
         public String align = "LEFT"; // stored as string in JSON
@@ -101,12 +103,32 @@ public class HudConfig {
         for (var p : profiles.values()) p.normalize();
     }
 
+    /** Copies state from a deserialized snapshot into this singleton instance,
+     *  so callers don't need to reassign the INSTANCE reference. */
+    public void copyFrom(HudConfig src) {
+        if (src == null) return;
+        this.x = src.x;
+        this.y = src.y;
+        this.maxTargetDistance = src.maxTargetDistance;
+        this.debug = src.debug;
+        this.range = src.range;
+        this.coneAngleDeg = src.coneAngleDeg;
+        this.ignorePlayers = src.ignorePlayers;
+        this.showHud = src.showHud;
+        this.showSatsujinHud = src.showSatsujinHud;
+        this.aspectLvl2 = src.aspectLvl2;
+        this.satsujinX = src.satsujinX;
+        this.satsujinY = src.satsujinY;
+        this.useEndSounds = src.useEndSounds;
+        this.volume = src.volume;
+        if (src.chosenSymbols != null) this.chosenSymbols = new LinkedHashMap<>(src.chosenSymbols);
+        if (src.profiles != null) this.profiles = new LinkedHashMap<>(src.profiles);
+        for (var p : src.profiles.values()) p.normalize();;
+    }
+
     public Profile obtain(String key) {
         Profile p = profiles.get(key);
-        if (p == null) {
-            p = defaultProfiles().get(DEBUFF);
-        }
-        p.normalize();
+        if (p == null) throw new IllegalStateException("missing profile: " + key);
         return p;
     }
 

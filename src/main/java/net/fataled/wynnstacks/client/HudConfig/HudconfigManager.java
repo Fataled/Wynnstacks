@@ -3,16 +3,17 @@ package net.fataled.wynnstacks.client.HudConfig;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.fataled.wynnstacks.client.Utilities.LoggerUtils;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.LinkedHashMap;
-
 
 public class HudconfigManager {
 
-    private static final Logger LOGGER = LogManager.getLogger("HudconfigManager");
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final File CONFIG_PATH = new File(
             FabricLoader.getInstance().getConfigDir().toFile(),
@@ -22,28 +23,39 @@ public class HudconfigManager {
 
     public static void load() {
         if (CONFIG_PATH.exists()) {
-            try (FileReader reader = new FileReader(CONFIG_PATH)) {
-                HudConfig.INSTANCE = GSON.fromJson(reader, HudConfig.class);
+            try (var reader = Files.newBufferedReader(CONFIG_PATH.toPath(), StandardCharsets.UTF_8)) {
+                HudConfig parsed = GSON.fromJson(reader, HudConfig.class);
+                HudConfig.INSTANCE.copyFrom(parsed);
+                HudConfig.INSTANCE.ensureDefaults();
                 if (HudConfig.INSTANCE.chosenSymbols == null) {
                     HudConfig.INSTANCE.chosenSymbols = new LinkedHashMap<>();
                 }
-                LOGGER.info("HUD config loaded successfully.");
+                LoggerUtils.info("HUD config loaded successfully.");
             } catch (IOException e) {
-                LOGGER.error("Failed to load HUD config: {}", e.getMessage());
+                LoggerUtils.error("Failed to load HUD config", e);
             }
         } else {
-            LOGGER.warn("HUD config file not found. Creating default config.");
+            LoggerUtils.warn("HUD config file not found. Creating default config.");
             reset();
             save();
         }
     }
 
     public static void save() {
-        try (FileWriter writer = new FileWriter(CONFIG_PATH)) {
+        Path real = CONFIG_PATH.toPath();
+        Path temp = real.resolveSibling(real.getFileName() + ".tmp");
+        try (var writer = Files.newBufferedWriter(temp, StandardCharsets.UTF_8)) {
             GSON.toJson(HudConfig.INSTANCE, writer);
-            LOGGER.info("HUD config saved to file.");
+            LoggerUtils.info("HUD config saved to {}", real.getFileName());
         } catch (IOException e) {
-            LOGGER.error("Failed to save HUD config: {}", e.getMessage());
+            LoggerUtils.error("Failed to write temp config", e);
+            try { Files.deleteIfExists(temp); } catch (IOException ignored) {}
+            return;
+        }
+        try {
+            Files.move(temp, real, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (Exception e){
+            LoggerUtils.error("Failed to swap config into place", e);
         }
     }
 
@@ -58,10 +70,10 @@ public class HudconfigManager {
         HudConfig.INSTANCE.debug = false;
         HudConfig.INSTANCE.showHud = true;
 
-        HudConfig.INSTANCE.AspectLvl2 = false;
-        HudConfig.INSTANCE.Volume = 10f;
-        HudConfig.INSTANCE.SatsujinX = 0;
-        HudConfig.INSTANCE.SatsujinY = 50;
+        HudConfig.INSTANCE.aspectLvl2 = false;
+        HudConfig.INSTANCE.volume = 10f;
+        HudConfig.INSTANCE.satsujinX = 0;
+        HudConfig.INSTANCE.satsujinY = 50;
         HudConfig.INSTANCE.showSatsujinHud = true;
 
         // Ensure map exists and has keys before replaceAll
@@ -69,7 +81,7 @@ public class HudconfigManager {
             HudConfig.INSTANCE.chosenSymbols = new LinkedHashMap<>();
         }
         // Seed your default keys (strings are safest in JSON)
-        String[] defaultCodes = {"0x271C","0x2248","0x2699","0x2620","0xE03A","0xE03F","0xE03D","0xE03C","0x2694"};
+        var defaultCodes = HudConfig.defaultChosenSymbols().keySet();
         for (String code : defaultCodes) {
             HudConfig.INSTANCE.chosenSymbols.putIfAbsent(code, true); // or false if you prefer
         }
@@ -77,7 +89,7 @@ public class HudconfigManager {
         // Flip everything on (or off)
         HudConfig.INSTANCE.chosenSymbols.replaceAll((k, v) -> true);
 
-        LOGGER.info("HUD config reset to default values.");
+        LoggerUtils.info("HUD config reset to default values.");
     }
 
     public static void resetAndSave() {

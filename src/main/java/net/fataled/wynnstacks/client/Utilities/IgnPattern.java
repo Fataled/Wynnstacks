@@ -7,10 +7,17 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public class IgnPattern {
+public final class IgnPattern {
 
     private static final Pattern NO_MATCH = Pattern.compile("(?!)");
+    private IgnPattern(){
+
+    }
+
+    public static final IgnPattern INSTANCE = new IgnPattern();
+
     private final AtomicReference<Pattern> pattern = new AtomicReference<>(NO_MATCH);
+
     private Set<String> lastRoster = Collections.emptySet();
 
     public Pattern getPattern() { return pattern.get(); }

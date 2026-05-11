@@ -60,6 +60,7 @@ public class HudconfigScreenPageSymbols extends Screen {
             ButtonWidget btn = ButtonWidget.builder(Text.literal("..."), b -> {
                 boolean newVal = !HudConfig.INSTANCE.chosenSymbols.getOrDefault(key, false);
                 HudConfig.INSTANCE.chosenSymbols.put(key, newVal);
+                HudConfig.bumpSymbolVersion();
                 refreshLabel.run();
             }).position(xPos - 100, yPos).size(200, 20).build();
 
@@ -91,6 +92,12 @@ public class HudconfigScreenPageSymbols extends Screen {
                 0xFFFFFF
         );
 
+    }
+
+    @Override
+    public void close(){
+        HudconfigManager.save();
+        super.close();
     }
 }
 

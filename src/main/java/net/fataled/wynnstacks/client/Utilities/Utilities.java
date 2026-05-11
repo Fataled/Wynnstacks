@@ -4,7 +4,9 @@ import net.minecraft.text.*;
 import net.minecraft.util.Identifier;
 
 
-public class Utilities {
+public final class Utilities {
+
+    private Utilities() {}
 
     private static final Identifier PUA_FONT = Identifier.of("wynnstacks", "default");
     public static final StyleSpriteSource.Font Pua_Font = new StyleSpriteSource.Font(PUA_FONT);
@@ -14,8 +16,19 @@ public class Utilities {
     }
 
     public static Text stylePUAOnly(String s) {
+        boolean anyPua = false;
+        int i = 0;
+        while (i < s.length()){
+            int codePoint = s.codePointAt(i);
+            if(isPUA(codePoint)) {anyPua = true; break;}
+            i += Character.charCount(codePoint);
+        }
+
+        if (!anyPua) return Text.literal(s);
+
         MutableText out = Text.empty();
-        int i = 0, n = s.length();
+        i = 0;
+        int n = s.length();
         while (i < n) {
             int j = i;
             boolean pua = isPUA(s.codePointAt(i));

@@ -25,9 +25,6 @@ public class HudconfigScreen extends Screen {
         addDrawableChild(ButtonWidget.builder(Text.literal("Satsujin HUD"), button ->
                 MinecraftClient.getInstance().setScreen(new HudconfigScreenPage3(this))).position(centerX, y).size(95, 20).build());
 
-        //addDrawableChild(ButtonWidget.builder(Text.literal("colors"), button ->
-                //MinecraftClient.getInstance().setScreen(new HudconfigScreenPageColorSettings(this))).position(centerX - 50, y+ 60).size(95, 20).build());
-
         addDrawableChild(ButtonWidget.builder(Text.literal("Reset"), button -> {
             HudconfigManager.resetAndSave();
             MinecraftClient.getInstance().setScreen(null);

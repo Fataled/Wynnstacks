@@ -8,22 +8,16 @@
   "contact": {},
   "license": "MIT",
   "icon": "assets/wynnstacks/icon.png",
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
     "client": [
       "net.fataled.wynnstacks.client.WynnstacksClient"
-    ],
-    "main": [
-      "net.fataled.wynnstacks.Wynnstacks"
     ],
     "modmenu": [
       "net.fataled.wynnstacks.client.Utilities.WynnstacksModMenu"
     ]
 
   },
-  "mixins": [
-    "wynnstacks.mixins.json"
-  ],
   "depends": {
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
