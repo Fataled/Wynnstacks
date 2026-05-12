@@ -1,6 +1,7 @@
-package net.fataled.wynnstacks.client.Utilities;
+package net.fataled.wynnstacks.client.util;
 
-import net.fataled.wynnstacks.client.HudConfig.HudConfig;
+import net.fataled.wynnstacks.client.config.HudConfig;
+import net.fataled.wynnstacks.client.label.MobLabelUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.DisplayEntity.TextDisplayEntity;

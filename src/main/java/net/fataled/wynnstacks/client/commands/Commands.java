@@ -1,6 +1,7 @@
 package net.fataled.wynnstacks.client.commands;
 
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fataled.wynnstacks.client.rendering.HudRender;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -20,6 +21,17 @@ public class Commands {
                         .then(literal("Help").executes(ctx -> {
                             var player = MinecraftClient.getInstance().player;
                             if (player != null) player.sendMessage(buildHelpText(), false);
+                            return 1;
+                        }))
+                        .then(literal("Demo").executes(ctx -> {
+                            HudRender.pushDemo();
+                            var player = MinecraftClient.getInstance().player;
+                            if (player != null) {
+                                player.sendMessage(
+                                    Text.literal("HUD demo shown for ~10s — PUA codepoint rendered as text.")
+                                        .formatted(Formatting.GOLD),
+                                    false);
+                            }
                             return 1;
                         }))
                 )

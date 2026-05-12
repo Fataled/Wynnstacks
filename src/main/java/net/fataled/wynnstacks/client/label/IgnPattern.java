@@ -1,4 +1,6 @@
-package net.fataled.wynnstacks.client.Utilities;
+package net.fataled.wynnstacks.client.label;
+
+import net.fataled.wynnstacks.client.util.ClientUtils;
 
 import java.util.Collections;
 import java.util.Objects;

@@ -1,9 +1,9 @@
-package net.fataled.wynnstacks.client.HudConfig;
+package net.fataled.wynnstacks.client.config;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import net.fabricmc.loader.api.FabricLoader;
-import net.fataled.wynnstacks.client.Utilities.LoggerUtils;
+import net.fataled.wynnstacks.client.util.LoggerUtils;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -12,7 +12,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.LinkedHashMap;
 
-public class HudconfigManager {
+public class HudConfigManager {
 
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final File CONFIG_PATH = new File(

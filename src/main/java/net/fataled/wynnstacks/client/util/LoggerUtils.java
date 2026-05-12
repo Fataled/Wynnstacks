@@ -1,4 +1,4 @@
-package net.fataled.wynnstacks.client.Utilities;
+package net.fataled.wynnstacks.client.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

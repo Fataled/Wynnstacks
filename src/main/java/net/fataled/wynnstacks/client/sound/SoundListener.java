@@ -1,7 +1,10 @@
-package net.fataled.wynnstacks.client.Utilities;
+package net.fataled.wynnstacks.client.sound;
 
 import java.util.concurrent.ConcurrentLinkedQueue;
-import net.fataled.wynnstacks.client.HudConfig.HudConfig;
+import net.fataled.wynnstacks.client.config.HudConfig;
+import net.fataled.wynnstacks.client.label.MobLabelUtils;
+import net.fataled.wynnstacks.client.util.LoggerUtils;
+import net.fataled.wynnstacks.client.util.RaycastUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.sound.PositionedSoundInstance;
 import net.minecraft.client.sound.SoundInstance;
@@ -13,7 +16,7 @@ import net.minecraft.util.Identifier;
 import java.util.List;
 import java.util.Locale;
 
-public class MySoundListener implements SoundInstanceListener {
+public class SoundListener implements SoundInstanceListener {
 
     private static final Identifier SOUND_ONE = Identifier.of("minecraft:block.end_portal.spawn");
     private static final Identifier SOUND_TWO = Identifier.of("minecraft:block.enchantment_table.use");

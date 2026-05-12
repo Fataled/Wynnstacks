@@ -1,6 +1,6 @@
-package net.fataled.wynnstacks.client.Utilities;
+package net.fataled.wynnstacks.client.label;
 
-import net.fataled.wynnstacks.client.HudConfig.HudConfig;
+import net.fataled.wynnstacks.client.config.HudConfig;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.DisplayEntity.TextDisplayEntity;
 import net.minecraft.text.Text;
@@ -20,23 +20,24 @@ public class MobLabelUtils {
 
     // Keep all lower-case; we lower candidate strings once.
     public static final List<String> PRIORITY_LABELS = List.of(
-            "mummyboard", "virus", "accipientis", "matrojan", "titanium", "death metal", "mechorrupter", "robob", "cybel", "legendary", "yahya",
+            "mummyboard", "virus", "accipientis", "matrojan", "titanium", "death metal", "mechorrupter", "robob",
+            "cybel", "legendary", "yahya",
             "grootslang", "orphion", "colossus", "anomaly", "parasite",
-            "argaddon", "witch", "guardian", "chained", "alkevö", "death", "strato", "qira", "aledar", "tasim", "psychomancer",
-            "dummy"
-    );
+            "argaddon", "witch", "guardian", "chained", "alkevö", "death", "strato", "qira", "aledar", "tasim",
+            "psychomancer",
+            "dummy");
 
     private volatile static int cachedSymbolVersion = -1;
     private volatile static int[] cachedEnabledSorted = new int[0];
 
-    // Code points for stat symbols; keep as boxed ints unless you want to pull in fastutil IntSets.
+    // Code points for stat symbols; keep as boxed ints unless you want to pull in
+    // fastutil IntSets.
     // Just remove Winded
     // New fruma debudd hypoxia doesn't work for now
     // Not new but add whipped for summoner
     // Bleeding for aco not needed to be refreshed to frequently
     private static final Set<Integer> STAT_SYMBOLS = Set.of(
             0x271C, // ✜
-            0x2248, // ≈
             0x2699, // ⚙
             0x2620, // ☠
             0xE03A, // Tricks
@@ -44,10 +45,10 @@ public class MobLabelUtils {
             0xE03D, // Enkindled
             0xE03C, // Confusion
             0xE043, // Contamination
-            0x2694  // ⚔
+            0x2694 // ⚔
     );
     private static final int[] STAT_SYMBOLS_SORTED = {
-            0x2248, 0x2620, 0x2694, 0x2699, 0x271C,
+            0x2620, 0x2694, 0x2699, 0x271C,
             0xE03A, 0xE03C, 0xE03D, 0xE03F, 0xE043
     };
 
@@ -55,18 +56,20 @@ public class MobLabelUtils {
     private static final Pattern COLOR_CODES = Pattern.compile("§[0-9a-fk-or]");
     private static final Pattern LINE_SPLIT = Pattern.compile("\\R");
     private static final Pattern SHORT_NEG_NUM = Pattern.compile("^-\\d+(\\s*[\\p{So}\\p{Punct}]*)?$");
-    private static final Pattern SHORT_POS_NUM = Pattern.compile("^\\+\\d+(\\s*[\\p{So}\\p{Punct}]*)?$"); // FIXED: escaped '+'
+    private static final Pattern SHORT_POS_NUM = Pattern.compile("^\\+\\d+(\\s*[\\p{So}\\p{Punct}]*)?$"); // FIXED:
+                                                                                                          // escaped '+'
     private static final Pattern SECONDS_TAIL = Pattern.compile("\\b\\d+\\s*s\\b");
     private static final Pattern PRIORITY_REGEX = Pattern.compile(
             String.join("|", PRIORITY_LABELS),
-            Pattern.CASE_INSENSITIVE
-    );
+            Pattern.CASE_INSENSITIVE);
 
-    /* =========================
-       Public API
-       ========================= */
+    /*
+     * =========================
+     * Public API
+     * =========================
+     */
 
-    public static boolean isPriority(String label){
+    public static boolean isPriority(String label) {
         return PRIORITY_REGEX.matcher(label).find();
     }
 
@@ -79,37 +82,43 @@ public class MobLabelUtils {
                 TextDisplayEntity.class, box,
                 td -> {
                     Text t = td.getText();
-                    if (t == null) return false;
+                    if (t == null)
+                        return false;
                     String s = t.getString();
-                    if (s == null) return false;
+                    if (s == null)
+                        return false;
                     s = s.trim();
                     return !s.isEmpty() && !isProbablyDamageLineFast(s);
-                }
-        );
+                });
 
-        if (labels.isEmpty()) return List.of();
+        if (labels.isEmpty())
+            return List.of();
 
         // Build text lines aligned above mob
         LinkedHashSet<String> lines = new LinkedHashSet<>(); // dedupe, preserve order
         for (TextDisplayEntity td : labels) {
-            if (!isAboveMob(mobPos, td.getEntityPos())) continue;
+            if (!isAboveMob(mobPos, td.getEntityPos()))
+                continue;
 
             String raw = safeString(td.getText());
-            //LoggerUtils.info("[WynnStacks] Raw: " + raw);
-            if (raw.isEmpty()) continue;
+            // LoggerUtils.info("[WynnStacks] Raw: " + raw);
+            if (raw.isEmpty())
+                continue;
 
             // split and normalize each physical line
             String[] parts = LINE_SPLIT.split(raw);
             for (String part : parts) {
                 String stripped = stripColors(part);
-                //LoggerUtils.info("[Wynnstacks] stripped: " + stripped); // #TODO remove this once done testing / comment it out
+                // LoggerUtils.info("[Wynnstacks] stripped: " + stripped); // #TODO remove this
+                // once done testing / comment it out
                 String cleaned = removeUnrenderableChars(stripped, true).trim();
                 if (!cleaned.isEmpty() && !isProbablyDamageLineFast(cleaned)) {
                     lines.add(cleaned);
                 }
             }
         }
-        if (lines.isEmpty()) return List.of();
+        if (lines.isEmpty())
+            return List.of();
 
         // Config-enabled symbols once
         final int[] enabled = enabledSymbols();
@@ -118,12 +127,14 @@ public class MobLabelUtils {
         ArrayList<String> out = new ArrayList<>(lines.size());
         for (String line : lines) {
             String pruned = removeDisabledStatChunks(line, enabled);
-            if (pruned.isEmpty()) continue;
+            if (pruned.isEmpty())
+                continue;
 
             // keep only lines that still have at least one stat symbol + a digit
             boolean hasSym = containsAnyCodepoint(pruned);
             boolean hasDigit = containsDigit(pruned);
-            if (hasSym && hasDigit) out.add(pruned);
+            if (hasSym && hasDigit)
+                out.add(pruned);
         }
         return out;
     }
@@ -133,33 +144,41 @@ public class MobLabelUtils {
 
         List<TextDisplayEntity> labels = mob.getEntityWorld().getEntitiesByClass(
                 TextDisplayEntity.class, box,
-                td -> td.getText() != null && !safeString(td.getText()).isEmpty()
-        );
-        if (labels.isEmpty()) return "";
+                td -> td.getText() != null && !safeString(td.getText()).isEmpty());
+        if (labels.isEmpty())
+            return "";
 
         LinkedHashSet<String> rawLines = new LinkedHashSet<>();
         for (TextDisplayEntity td : labels) {
             String raw = safeString(td.getText());
-            if (raw.isEmpty()) continue;
+            if (raw.isEmpty())
+                continue;
             String[] parts = LINE_SPLIT.split(raw);
             for (String part : parts) {
                 String cleaned = removeUnrenderableChars(stripColors(part), true).trim();
-                if (!cleaned.isEmpty()) rawLines.add(cleaned);
+                if (!cleaned.isEmpty())
+                    rawLines.add(cleaned);
             }
         }
-        if (rawLines.isEmpty()) return "";
+        if (rawLines.isEmpty())
+            return "";
 
         // Filter for candidates
         ArrayList<String> candidates = new ArrayList<>(rawLines.size());
         for (String s : rawLines) {
             String t = s.trim();
-            if (t.isEmpty()) continue;
+            if (t.isEmpty())
+                continue;
             String lower = t.toLowerCase(Locale.ROOT);
 
-            if (SECONDS_TAIL.matcher(lower).find()) continue;
-            if (lower.startsWith("x2")) continue;
-            if (IgnPattern.INSTANCE.getPattern().matcher(t).find()) continue;
-            if (isProbablyDamageLineFast(t)) continue;
+            if (SECONDS_TAIL.matcher(lower).find())
+                continue;
+            if (lower.startsWith("x2"))
+                continue;
+            if (IgnPattern.INSTANCE.getPattern().matcher(t).find())
+                continue;
+            if (isProbablyDamageLineFast(t))
+                continue;
 
             candidates.add(t);
         }
@@ -167,10 +186,12 @@ public class MobLabelUtils {
         // Priority match
         for (String c : candidates) {
             String lower = c.toLowerCase(Locale.ROOT);
-            if (isPriority(lower)) return c;
+            if (isPriority(lower))
+                return c;
         }
 
-        if (!candidates.isEmpty()) return candidates.getFirst();
+        if (!candidates.isEmpty())
+            return candidates.getFirst();
 
         // Fallback to mob display name (safe)
         Text disp = mob.getDisplayName();
@@ -183,9 +204,11 @@ public class MobLabelUtils {
         return "";
     }
 
-    /* =========================
-       Helpers
-       ========================= */
+    /*
+     * =========================
+     * Helpers
+     * =========================
+     */
 
     private static boolean isAboveMob(Vec3d mobPos, Vec3d labelPos) {
         double dx = labelPos.x - mobPos.x;
@@ -196,18 +219,20 @@ public class MobLabelUtils {
     }
 
     public static String stripColors(String input) {
-        if (input == null || input.isEmpty()) return "";
+        if (input == null || input.isEmpty())
+            return "";
         return COLOR_CODES.matcher(input).replaceAll("");
     }
 
     public static String removeUnrenderableChars(String input, boolean allowStatSymbols) {
-        if (input == null || input.isEmpty()) return "";
+        if (input == null || input.isEmpty())
+            return "";
 
         int len = input.length();
 
         int firstBad = -1;
         int i = 0;
-        while(i < len) {
+        while (i < len) {
             int codePoint = input.codePointAt(i);
             if (!isKeepable(codePoint, allowStatSymbols)) {
                 firstBad = i;
@@ -215,28 +240,29 @@ public class MobLabelUtils {
             }
             i += Character.charCount(codePoint);
         }
-            if (firstBad < 0) return input;
-
+        if (firstBad < 0)
+            return input;
 
         StringBuilder sb = new StringBuilder(len);
 
         sb.append(input, 0, firstBad);
 
         i = firstBad;
-        while(i < len){
+        while (i < len) {
             int codePoint = input.codePointAt(i);
             int width = Character.charCount(codePoint);
 
             boolean keep = isKeepable(codePoint, allowStatSymbols);
 
-            if (keep) sb.appendCodePoint(codePoint);
+            if (keep)
+                sb.appendCodePoint(codePoint);
 
             i += width;
         }
         return sb.toString();
     }
 
-    private static boolean isKeepable(int codePoint, boolean allowStatSymbols){
+    private static boolean isKeepable(int codePoint, boolean allowStatSymbols) {
         return (codePoint >= 32 && codePoint <= 126)
                 || Character.isWhitespace(codePoint) || (allowStatSymbols && isStatSymbol(codePoint));
     }
@@ -251,9 +277,11 @@ public class MobLabelUtils {
     }
 
     private static boolean isProbablyDamageLineFast(String s) {
-        if (s == null) return false;
+        if (s == null)
+            return false;
         String line = s.trim();
-        if (line.isEmpty()) return false;
+        if (line.isEmpty())
+            return false;
 
         // Strong early checks: short +/- numbers
         if (line.length() <= 8 && (SHORT_NEG_NUM.matcher(line).matches() || SHORT_POS_NUM.matcher(line).matches()))
@@ -301,7 +329,8 @@ public class MobLabelUtils {
     }
 
     private static String removeDisabledStatChunks(String line, int[] enabled) {
-        if (line == null || line.isEmpty()) return "";
+        if (line == null || line.isEmpty())
+            return "";
         int len = line.length();
         StringBuilder out = new StringBuilder(len);
         boolean skipping = false;
@@ -309,20 +338,24 @@ public class MobLabelUtils {
         int i = 0;
 
         while (i < len) {
-            while (i < len && Character.isWhitespace(line.charAt(i))) i++;
-            if (i >= len) break;
+            while (i < len && Character.isWhitespace(line.charAt(i)))
+                i++;
+            if (i >= len)
+                break;
 
             int tokenStart = i;
             int firstCodePoint = line.codePointAt(i);
 
-            while (i < len && !Character.isWhitespace(line.charAt(i))) i++;
+            while (i < len && !Character.isWhitespace(line.charAt(i)))
+                i++;
 
             boolean startsWithSymbol = Arrays.binarySearch(STAT_SYMBOLS_SORTED, firstCodePoint) >= 0;
             if (startsWithSymbol) {
                 skipping = Arrays.binarySearch(enabled, firstCodePoint) < 0;
             }
             if (!skipping) {
-                if (!firstOut) out.append(' ');
+                if (!firstOut)
+                    out.append(' ');
                 out.append(line, tokenStart, i);
                 firstOut = false;
             }

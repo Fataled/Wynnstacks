@@ -1,8 +1,8 @@
-package net.fataled.wynnstacks.client.Utilities;
+package net.fataled.wynnstacks.client.input;
 
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fataled.wynnstacks.client.HudConfig.HudconfigScreen;
+import net.fataled.wynnstacks.client.config.screen.HudConfigScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
@@ -18,7 +18,7 @@ public class KeybindManager {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
 
             if (openHudConfig.wasPressed()) {
-                client.setScreen(new HudconfigScreen(client.currentScreen));
+                client.setScreen(new HudConfigScreen(client.currentScreen));
             }
 
         });

@@ -1,4 +1,4 @@
-package net.fataled.wynnstacks.client.Utilities;
+package net.fataled.wynnstacks.client.util;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.client.MinecraftClient;
