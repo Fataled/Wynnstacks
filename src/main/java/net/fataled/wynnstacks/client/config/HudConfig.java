@@ -1,3 +1,5 @@
+//TODO make sure to make a way to update / validate the config file
+
 package net.fataled.wynnstacks.client.config;
 
 import com.google.gson.annotations.SerializedName;
@@ -19,6 +21,8 @@ public class HudConfig {
     public static final String CONFUSION = "confusion";
     public static final String CONTAMINATION = "contamination";
     public static final String WEAKENED = "weakened";
+    public static final String TWILIGHT = "twilight";
+    public static final String VULNERABLE = "Vulnerable";
 
     private static final AtomicInteger SYMBOL_VERSION = new AtomicInteger(0);
 
@@ -32,6 +36,8 @@ public class HudConfig {
 
     public static final HudConfig INSTANCE = new HudConfig();
 
+    @SerializedName("debugMode")
+    public boolean debugMode = false;
     @SerializedName("x")
     public int x = 10;
     @SerializedName("y")
@@ -69,7 +75,6 @@ public class HudConfig {
         Map<String, Boolean> map = new LinkedHashMap<>();
 
         map.put("0x271C", true);
-        map.put("0x2248", true);
         map.put("0x2699", true);
         map.put("0x2620", true);
         map.put("0xE03A", true);
@@ -78,6 +83,8 @@ public class HudConfig {
         map.put("0xE03C", true);
         map.put("0xE043", true);
         map.put("0x2694", true);
+        map.put("0xE04B", true);
+        map.put("0xE015", true);
         return map;
     }
 
@@ -175,6 +182,18 @@ public class HudConfig {
         weakened.outlineThicknessPx = 0f;
         weakened.outlineRgb = 0x0000F;
         m.put(WEAKENED, weakened);
+
+        Profile twilight = new Profile();
+        twilight.solidRgb = 0xFFFFFF;
+        twilight.outlineThicknessPx = 0f;
+        twilight.outlineRgb = 0x0000F;
+        m.put(TWILIGHT, twilight);
+
+        Profile vulnerable = new Profile();
+        vulnerable.solidRgb = 0xFFFFFF;
+        vulnerable.outlineThicknessPx = 0f;
+        vulnerable.outlineRgb = 0x0000F;
+        m.put(VULNERABLE, vulnerable);
 
         return m;
     }

@@ -1,3 +1,5 @@
+//TODO give vuln its logo
+
 package net.fataled.wynnstacks.client.config.screen;
 
 import net.fataled.wynnstacks.client.config.HudConfig;
@@ -64,7 +66,8 @@ public class HudConfigScreen extends Screen {
             Map.entry(HudConfig.ENKINDLED, 0xE03D),
             Map.entry(HudConfig.CONFUSION, 0xE03C),
             Map.entry(HudConfig.CONTAMINATION, 0xE043),
-            Map.entry(HudConfig.WEAKENED, 0x2694));
+            Map.entry(HudConfig.WEAKENED, 0x2694),
+            Map.entry(HudConfig.TWILIGHT, 0xE04B));
 
     private final Screen parent;
     private Category current = Category.GENERAL;

@@ -17,9 +17,7 @@ public class HudConfigManager {
     private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
     private static final File CONFIG_PATH = new File(
             FabricLoader.getInstance().getConfigDir().toFile(),
-            HudConfig.CONFIG_FILE
-    );
-
+            HudConfig.CONFIG_FILE);
 
     public static void load() {
         if (CONFIG_PATH.exists()) {
@@ -49,12 +47,15 @@ public class HudConfigManager {
             LoggerUtils.info("HUD config saved to {}", real.getFileName());
         } catch (IOException e) {
             LoggerUtils.error("Failed to write temp config", e);
-            try { Files.deleteIfExists(temp); } catch (IOException ignored) {}
+            try {
+                Files.deleteIfExists(temp);
+            } catch (IOException ignored) {
+            }
             return;
         }
         try {
             Files.move(temp, real, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
-        } catch (Exception e){
+        } catch (Exception e) {
             LoggerUtils.error("Failed to swap config into place", e);
         }
     }

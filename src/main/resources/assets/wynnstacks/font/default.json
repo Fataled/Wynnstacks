@@ -8,6 +8,20 @@
       "chars": [
         "\uE03A\uE03F\uE03D\uE03C\uE043"
       ]
+    },
+    {
+      "type": "bitmap",
+      "file": "wynnstacks:font/twilight.png",
+      "ascent": 8,
+      "height": 16,
+      "chars": ["\uE04B"]
+    },
+    {
+      "type": "bitmap",
+      "file": "wynnstacks:font/vuln.png",
+      "ascent": 8,
+      "height": 16,
+      "chars": ["\uE015"]
     }
   ]
 }

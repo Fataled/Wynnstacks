@@ -4,6 +4,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.hud.HudElementRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.hud.VanillaHudElements;
 import net.fataled.wynnstacks.client.config.HudConfig;
 import net.fataled.wynnstacks.client.label.MobLabelUtils;
+import net.fataled.wynnstacks.client.util.LoggerUtils;
 import net.fataled.wynnstacks.client.util.RaycastUtils;
 import net.fataled.wynnstacks.client.WynnstacksClient;
 import net.minecraft.client.MinecraftClient;
@@ -21,7 +22,7 @@ import static net.fataled.wynnstacks.client.rendering.PuaStyler.stylePUAOnly;
 public class HudRender {
     private static final HudRender INSTANCE = new HudRender();
     private static final Identifier HUD_RENDER_LAYER = Identifier.of("wynnstacks", "hud_render_layer");
-    private static final int HOLD_TICKS = 15;
+    private static final int HOLD_TICKS = 60;
     private UUID lastTargetId = null;
     private List<String> cachedLines = java.util.Collections.emptyList();
     private long holdUntilTick = 0;
@@ -66,6 +67,9 @@ public class HudRender {
         if (target == null)
             return;
         List<String> statLines = MobLabelUtils.getStatLines(target);
+        if (HudConfig.INSTANCE.debugMode) {
+            LoggerUtils.info("statlines: {}", statLines);
+        }
         if (!statLines.isEmpty()) {
             String label = MobLabelUtils.removeUnrenderableChars(
                     MobLabelUtils.getEntityLabelName(target), false).trim();

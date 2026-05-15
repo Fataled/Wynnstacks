@@ -1,6 +1,7 @@
 package net.fataled.wynnstacks.client.label;
 
 import net.fataled.wynnstacks.client.config.HudConfig;
+import net.fataled.wynnstacks.client.util.LoggerUtils;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.decoration.DisplayEntity.TextDisplayEntity;
 import net.minecraft.text.Text;
@@ -36,20 +37,9 @@ public class MobLabelUtils {
     // New fruma debudd hypoxia doesn't work for now
     // Not new but add whipped for summoner
     // Bleeding for aco not needed to be refreshed to frequently
-    private static final Set<Integer> STAT_SYMBOLS = Set.of(
-            0x271C, // ✜
-            0x2699, // ⚙
-            0x2620, // ☠
-            0xE03A, // Tricks
-            0xE03F, // Drained
-            0xE03D, // Enkindled
-            0xE03C, // Confusion
-            0xE043, // Contamination
-            0x2694 // ⚔
-    );
     private static final int[] STAT_SYMBOLS_SORTED = {
-            0x2620, 0x2694, 0x2699, 0x271C,
-            0xE03A, 0xE03C, 0xE03D, 0xE03F, 0xE043
+            0x2620, 0x2694, 0x2699, 0x271C, 0xE015,
+            0xE03A, 0xE03C, 0xE03D, 0xE03F, 0xE043, 0xE04B
     };
 
     // Precompiled patterns (avoid recompiling every call)
@@ -109,9 +99,15 @@ public class MobLabelUtils {
             String[] parts = LINE_SPLIT.split(raw);
             for (String part : parts) {
                 String stripped = stripColors(part);
-                // LoggerUtils.info("[Wynnstacks] stripped: " + stripped); // #TODO remove this
+                // LoggerUtils.info("[Wynnstacks] stripped: " + stripped);
                 // once done testing / comment it out
+                if (HudConfig.INSTANCE.debugMode) {
+                    LoggerUtils.info("Before removing unrenderable chars {}", stripped);
+                }
                 String cleaned = removeUnrenderableChars(stripped, true).trim();
+                if (HudConfig.INSTANCE.debugMode) {
+                    LoggerUtils.info("possible statline: {}", cleaned);
+                }
                 if (!cleaned.isEmpty() && !isProbablyDamageLineFast(cleaned)) {
                     lines.add(cleaned);
                 }
@@ -133,6 +129,9 @@ public class MobLabelUtils {
             // keep only lines that still have at least one stat symbol + a digit
             boolean hasSym = containsAnyCodepoint(pruned);
             boolean hasDigit = containsDigit(pruned);
+            if (HudConfig.INSTANCE.debugMode) {
+                LoggerUtils.info("pruned: {}", pruned);
+            }
             if (hasSym && hasDigit)
                 out.add(pruned);
         }
@@ -230,18 +229,22 @@ public class MobLabelUtils {
 
         int len = input.length();
 
+        int debugPoint = 0;
         int firstBad = -1;
         int i = 0;
         while (i < len) {
             int codePoint = input.codePointAt(i);
+            debugPoint = codePoint;
             if (!isKeepable(codePoint, allowStatSymbols)) {
                 firstBad = i;
                 break;
             }
             i += Character.charCount(codePoint);
         }
-        if (firstBad < 0)
+        if (firstBad < 0) {
+            LoggerUtils.info("Removed: {} {} ", input, debugPoint);
             return input;
+        }
 
         StringBuilder sb = new StringBuilder(len);
 

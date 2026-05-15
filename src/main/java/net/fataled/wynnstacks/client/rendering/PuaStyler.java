@@ -24,7 +24,8 @@ public final class PuaStyler {
             0xE03D, HudConfig.ENKINDLED,
             0xE03C, HudConfig.CONFUSION,
             0xE043, HudConfig.CONTAMINATION,
-            0x2694, HudConfig.WEAKENED);
+            0x2694, HudConfig.WEAKENED,
+            0xE04B, HudConfig.TWILIGHT);
 
     private static HudConfig.Profile getProfile(int codePoint) {
         String key = profiles.get(codePoint);
@@ -39,7 +40,6 @@ public final class PuaStyler {
     public static Text stylePUAOnly(String s) {
         MutableText out = Text.empty();
         HudConfig.Profile profile = null;
-        LoggerUtils.info("Trying to render: {}", s);
         int i = 0, n = s.length();
         int lastStyled = -1;
         while (i < n) {
@@ -49,7 +49,6 @@ public final class PuaStyler {
             MutableText seg = Text.literal(s.substring(i, i + cc));
             if (styled) {
                 lastStyled = cp;
-                LoggerUtils.info("lastStyled was:", lastStyled);
             }
             profile = getProfile(cp);
             if (profile == null)

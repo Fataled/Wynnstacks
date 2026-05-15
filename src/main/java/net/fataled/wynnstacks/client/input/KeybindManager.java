@@ -7,8 +7,6 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
 
-
-
 public class KeybindManager {
 
     private static KeyBinding openHudConfig;
@@ -24,13 +22,13 @@ public class KeybindManager {
         });
 
     }
-        private static KeyBinding registerKey (String name,int keyCode, String id){
 
-            return KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                    name,
-                    keyCode,
-                    KeyBinding.Category.create(Identifier.of(id))
-            ));
-        }
+    private static KeyBinding registerKey(String name, int keyCode, String id) {
+
+        return KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                name,
+                keyCode,
+                KeyBinding.Category.create(Identifier.of(id))));
+    }
 
 }
